@@ -1,0 +1,37 @@
+{
+  "name": "mytheme",
+  "version": "1.0.0",
+  "description": "A modern WordPress theme built with Tailwind CSS",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/style.css -o ./assets/css/style.css --watch",
+    "build:css": "tailwindcss -i ./src/style.css -o ./assets/css/style.css --minify",
+    "build:assets": "node minify.js",
+    "build": "npm run build:css && npm run build:assets"
+  },
+  "keywords": [
+    "wordpress",
+    "theme",
+    "tailwindcss",
+    "responsive",
+    "modern"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.16",
+    "clean-css-cli": "^5.6.3",
+    "csso-cli": "^4.0.2",
+    "glob": "^11.0.3",
+    "postcss-nested": "^7.0.2",
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-flip": "^1.0.0",
+    "terser": "^5.44.0"
+  },
+  "dependencies": {
+    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-rtl": "^0.9.0"
+  }
+}
