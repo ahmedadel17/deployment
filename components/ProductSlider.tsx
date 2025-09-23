@@ -3,13 +3,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getProducts } from '@/data/products';
 import ProductCard from './product/ProductCard';
 
-export default function ProductSlider() {
+export default function ProductSlider({ products }: { products: any[] }) {
+  console.log('products',products);
   const [isRTL, setIsRTL] = useState(false);
-  const [products] = useState(() => getProducts({ limit: 12 }));
-
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     containScroll: false,

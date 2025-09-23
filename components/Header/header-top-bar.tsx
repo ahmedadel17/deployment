@@ -1,5 +1,7 @@
 
+
 function HeaderTopBar() {
+ 
   return (
       <div className="site-topbar bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 py-3 flex items-center text-sm hidden lg:flex">
     <div className="container">

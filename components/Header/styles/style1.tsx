@@ -3,9 +3,12 @@ import HeaderNotification from '../header-notification'
 import HeaderWishlist from '../header-wish-list'
 import HeaderAccount from '../header-account'
 import HeaderCart from '../header-cart'
+import { CartProvider, useCart } from '@/context/CartContext'
 import HeaderDarkMode from '../header-dark-mode'
 import HeaderDesktopMenu from '../header-desktop-menu'
 import HeaderMobileMenu from '../header-mobile-menu'
+
+import LanguageSwitcher from '../LanguageSwitcher'
 
 
 function style1() {
@@ -31,14 +34,16 @@ function style1() {
                 <div className="items-center hidden lg:flex gap-2">
 
                     {/* <!-- Notification --> */}
+                    <LanguageSwitcher />
                     <HeaderNotification />
+
 
                     {/* <!-- Wishlist --> */}
                     <HeaderWishlist />
                     {/* <!-- Account --> */}
                     <HeaderAccount />
                     {/* <!-- Cart --> */}
-                    <HeaderCart cartItems={[]} />
+                      <HeaderCart />
 
                    
 

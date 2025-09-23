@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useTranslations } from "next-intl";
 type Link = {
   name: string;
   url: string;
@@ -10,50 +10,51 @@ type FooterMenu = {
   links: Link[];
 };
 
-const footerMenus: FooterMenu[] = [
-  {
-    title: "Company",
-    links: [
-      { name: "About Us", url: "#about" },
-      { name: "Careers", url: "#careers" },
-      { name: "Press", url: "#press" },
-      { name: "Blog", url: "#blog" },
-      { name: "Partners", url: "#partners" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { name: "Help Center", url: "#help" },
-      { name: "Contact", url: "#contact" },
-      { name: "FAQs", url: "#faqs" },
-      { name: "Live Chat", url: "#chat" },
-      { name: "Guides", url: "#guides" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { name: "Privacy Policy", url: "privacy-page.php" },
-      { name: "Terms of Service", url: "terms-page.php" },
-      { name: "Cookies", url: "cookies-page.php" },
-      { name: "Disclaimer", url: "#disclaimer" },
-      { name: "Accessibility", url: "#accessibility" },
-    ],
-  },
-  {
-    title: "Social",
-    links: [
-      { name: "Facebook", url: "#facebook" },
-      { name: "Twitter", url: "#twitter" },
-      { name: "Instagram", url: "#instagram" },
-      { name: "LinkedIn", url: "#linkedin" },
-      { name: "YouTube", url: "#youtube" },
-    ],
-  },
-];
 
 const FooterMenu: React.FC = () => {
+  const t = useTranslations();
+  const footerMenus: FooterMenu[] = [
+    {
+      title: t("Company"),
+      links: [
+        { name: t("About Us"), url: "#about" },
+        { name: t("Careers"), url: "#careers" },
+        { name: t("Press"), url: "#press" },
+        { name: t("Blog"), url: "#blog" },
+        { name: t("Partners"), url: "#partners" },
+      ],
+    },
+    {
+      title: t("Support"),
+      links: [
+        { name: t("Help Center"), url: "#help" },
+        { name: t("Contact"), url: "#contact" },
+        { name: t("FAQs"), url: "#faqs" },
+        { name: t("Live Chat"), url: "#chat" },
+        { name: t("Guides"), url: "#guides" },
+      ],
+    },
+    {
+      title: t("Legal"),
+      links: [
+        { name: t("Privacy Policy"), url: "privacy-page.php" },
+        { name: t("Terms of Service"), url: "terms-page.php" },
+        { name: t("Cookies"), url: "cookies-page.php" },
+        { name: t("Disclaimer"), url: "#disclaimer" },
+        { name: t("Accessibility"), url: "#accessibility" },
+      ],
+    },
+    {
+      title: t("Social"),
+      links: [
+        { name: t("Facebook"), url: "#facebook" },
+        { name: t("Twitter"), url: "#twitter" },
+        { name: t("Instagram"), url: "#instagram" },
+        { name: t("LinkedIn"), url: "#linkedin" },
+        { name: t("YouTube"), url: "#youtube" },
+      ],
+    },
+  ];
   return (
     <footer className="footer">
       {footerMenus.map((menu, idx) => (
@@ -65,7 +66,7 @@ const FooterMenu: React.FC = () => {
                 {menu.links.map((link, i) => (
                   <li key={i}>
                     <a href={link.url} className="te-footer-link">
-                      {link.name}
+                      {(link.name)}
                     </a>
                   </li>
                 ))}

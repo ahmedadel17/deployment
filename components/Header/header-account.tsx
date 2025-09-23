@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {useTranslations} from 'next-intl';
 
 type MenuItem = {
   title: string;
@@ -64,7 +65,7 @@ const HeaderAccount: React.FC = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const t = useTranslations()
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -112,10 +113,10 @@ const HeaderAccount: React.FC = () => {
         {/* Greeting */}
         <div className="grid">
           <span className="text-gray-600 dark:text-gray-400 text-sm">
-            My Account
+            {t("My Account")}
           </span>
           <span className="text-gray-900 dark:text-gray-100 text-sm font-medium">
-            Hi, Ahmed
+            {t("Hi")}, Ahmed
           </span>
         </div>
 

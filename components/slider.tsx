@@ -2,13 +2,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-function Slider() {
+import { useTranslations } from 'next-intl'
+function Slider({slides}: {slides: any[]}) {
   const [isRTL, setIsRTL] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-
+const t = useTranslations()
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     containScroll: 'trimSnaps',
@@ -18,22 +18,7 @@ function Slider() {
     direction: isRTL ? 'rtl' : 'ltr',
   });
   
-  const slides = [
-    {
-      id: 1,
-      backgroundImage: '/assets/images/Slider-01.webp',
-      title: 'Grace and Style For All Occasions',
-      description: 'Exquisite pieces that embody elegance, and enduring beauty',
-      buttonText: 'Shop Collection'
-    },
-    {
-      id: 2,
-      backgroundImage: '/assets/images/Slider-02.webp',
-      title: 'Where Elegance Meets Craftsmanship',
-      description: 'Each piece tells a story of artistry, sophistication, and everlasting beauty.',
-      buttonText: 'Shop the Collection'
-    }
-  ];
+ 
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -60,6 +45,19 @@ function Slider() {
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
   }, [emblaApi, onSelect]);
+
+  // Reinitialize Embla when direction changes so it flips correctly
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit({
+      loop: true,
+      containScroll: 'trimSnaps',
+      align: 'start',
+      skipSnaps: false,
+      dragFree: false,
+      direction: isRTL ? 'rtl' : 'ltr',
+    });
+  }, [emblaApi, isRTL]);
 
   // RTL Detection
   useEffect(() => {
@@ -101,12 +99,16 @@ function Slider() {
       {/* Embla Carousel */}
       <div className="embla h-full" ref={emblaRef}>
         <div className="embla__container flex h-full">
-          {slides.map((slide) => (
+          {slides?.map((slide) => (
             <div key={slide.id} className="embla__slide flex-shrink-0 w-full h-full">
-              <div
-                className="w-full h-full relative bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${slide.backgroundImage})` }}
-              >
+              <div className="w-full h-full relative">
+                {/* Background image (mirrored in RTL) */}
+                <img
+                  src={slide.image}
+                  alt=""
+                  className={`absolute inset-0 w-full h-full object-cover ${isRTL ? 'scale-x-[-1]' : ''}`}
+                />
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-20 z-10"></div>
 
@@ -115,7 +117,7 @@ function Slider() {
                   <div className="container-wrapper h-full">
                     <div className="te-hero-item grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_1.618fr] items-center h-full">
                       <div className="col-span-1">
-                        <div className="space-y-6">
+                        <div className="space-y-6 text-left rtl:text-right">
                           <h2 className="slider-title text-3xl md:text-4xl lg:text-5xl font-bold leading-tight animated text-white">
                             {slide.title}
                           </h2>
@@ -123,7 +125,7 @@ function Slider() {
                             {slide.description}
                           </p>
                           <a href="#" className="te-btn te-btn-primary animated">
-                            {slide.buttonText}
+                            {'Shop Collection'}
                           </a>
                         </div>
                       </div>
@@ -140,7 +142,7 @@ function Slider() {
       <button 
         onClick={scrollPrev}
         disabled={!canScrollPrev}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-20 text-white p-3 rounded-full hover:bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-30 disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`absolute top-1/2 ${isRTL ? 'right-4' : 'left-4'} transform -translate-y-1/2 bg-black bg-opacity-20 text-white p-3 rounded-full hover:bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-30 disabled:opacity-50 disabled:cursor-not-allowed`}
         aria-label={isRTL ? "Next Slide" : "Previous Slide"}
       >
         {isRTL ? (
@@ -153,7 +155,7 @@ function Slider() {
       <button 
         onClick={scrollNext}
         disabled={!canScrollNext}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-20 text-white p-3 rounded-full hover:bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-30 disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`absolute top-1/2 ${isRTL ? 'left-4' : 'right-4'} transform -translate-y-1/2 bg-black bg-opacity-20 text-white p-3 rounded-full hover:bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-30 disabled:opacity-50 disabled:cursor-not-allowed`}
         aria-label={isRTL ? "Previous Slide" : "Next Slide"}
       >
         {isRTL ? (

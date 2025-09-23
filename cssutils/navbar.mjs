@@ -365,6 +365,13 @@ export default plugin(function ({ addComponents, theme }) {
                 backgroundColor: theme('colors.gray.800'),
                 borderColor: theme('colors.gray.600'),
             }
+        ,
+            // RTL correction: anchor relative to the trigger from the right side
+            'html[dir="rtl"] &': {
+                left: 'auto',
+                right: '50%',
+                transform: 'translateX(50%)',
+            }
         },
 
         '.te-navbar-mega-menu-grid': {

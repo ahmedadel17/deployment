@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingCart, Eye, BarChart3 } from 'lucide-react';
 import { Product } from '@/types/product';
+import { useCart } from "@/context/CartContext";
 
 interface ProductCardProps {
   product: Product;
@@ -15,19 +16,28 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
   const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(product?.is_is_favourite);
   const [isComparing, setIsComparing] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const { addItem } = useCart();
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
   };
-
+  const { cartItems, setCartItems } = useCart( JSON.parse(localStorage.getItem('cart')||'[]'));
+  const addToCart = (product: any) => {
+    setCartItems([...cartItems, product]);
+    if(cartItems.length > 0){
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+    }
+  };
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const priceNumber = Number((product as any)?.price_after_discount ?? (product as any)?.price ?? 0);
+    addToCart(product);
     setIsAddedToCart(true);
     setTimeout(() => setIsAddedToCart(false), 2000);
   };
@@ -141,19 +151,19 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
 
           {/* Thumbnail Main Image */}
           <Image
-            src={product.image || '/assets/images/placeholder.jpg'}
-            alt={product.title}
+            src={product?.thumbnail || '/assets/images/placeholder.jpg'}
+            alt={product.name}
             width={300}
             height={320}
-            className="w-full h-full object-cover transition-all duration-500 ease-in-out transform"
+            className="w-full h-full object-cover transition-all duration-500 ease-in-out transform min-h-[320px]"
             priority
           />
 
           {/* Thumbnail Flip Image */}
-          {product.hover && (
+          {product.thumbnail && (
             <Image
-              src={product.hover}
-              alt={`${product.title} hover image`}
+              src={product.thumbnail}
+              alt={`${product.name} hover image`}
               width={300}
               height={320}
               className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out transform scale-105 opacity-0 group-hover:scale-100 group-hover:opacity-100"
@@ -167,18 +177,23 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
         <div className="flex-1">
           <Link href={`/products/${product.id}`}>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
-              {product.title}
+              {product.name}
             </h3>
+          </Link>
+          <Link href={`/products/${product.id}`}>
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
+              {product.short_description}
+            </h4>
           </Link>
 
           {/* Price */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg font-bold text-gray-900 dark:text-white">
-              ${product.price}
+              ${product?.price_after_discount}
             </span>
-            {product.old_price && (
+            {product.min_price && (
               <span className="text-sm text-gray-500 line-through">
-                ${product.old_price}
+                ${product.min_price }
               </span>
             )}
           </div>
@@ -227,30 +242,45 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
           )}
         </div>
 
-        {/* Add to Cart Button */}
-        <button
-          onClick={handleAddToCart}
-          disabled={isAddedToCart}
-          className={`w-full py-2 px-4 rounded-lg font-medium  duration-300 flex items-center justify-center gap-2 ${
-            isAddedToCart
-              ? 'bg-green-500 text-white'
-              : 'bg-primary-500 text-white hover:bg-primary-600'
-          }`}
-        >
-          {isAddedToCart ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Added!
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-4 h-4" />
-              Add to Cart
-            </>
-          )}
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAddToCart}
+            disabled={isAddedToCart}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium duration-300 flex items-center justify-center gap-2 ${
+              isAddedToCart
+                ? 'bg-green-500 text-white'
+                : 'bg-primary-500 text-white hover:bg-primary-600'
+            }`}
+          >
+            {isAddedToCart ? (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Added!
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                Add to Cart
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleWishlistToggle}
+            className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors ${
+              isWishlisted
+                ? 'border-red-500 bg-red-50 text-red-600 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-red-400'
+            }`}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+          </button>
+        </div>
       </div>
     </div>
   );

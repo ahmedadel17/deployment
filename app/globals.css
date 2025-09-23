@@ -5,9 +5,7 @@
 
 
 /* Regular */
-*{
-    font-family:'inter'
-}
+
 @font-face {
     font-family: "inter";
     src: url("/assets/fonts/ltr/inter/regular.woff2") format("woff2");
