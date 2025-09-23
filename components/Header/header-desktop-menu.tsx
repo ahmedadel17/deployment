@@ -1,11 +1,12 @@
 import {getTranslations} from 'next-intl/server';
+import Link from 'next/link';
 
 async function HeaderDesktopMenu() {
     const t = await getTranslations();
   return (
     <div className="te-navbar-nav te-navbar-nav-desktop border-t border-gray-100 dark:border-gray-700 justify-center hidden lg:flex">
 
-    <a href="index.php" className="te-navbar-link te-navbar-link-active">{t("Home")}</a>
+    <Link href="/" className="te-navbar-link te-navbar-link-active">{t("Home")}</Link>
 
     <div className="te-navbar-mega-dropdown"><a href="#" className="te-navbar-link te-navbar-link-has-mega-menu">{t("Men")}</a>
         <div className="te-navbar-mega-menu te-navbar-mega-menu-2-col">
