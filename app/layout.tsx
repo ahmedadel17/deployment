@@ -1,7 +1,7 @@
 import {NextIntlClientProvider} from 'next-intl';
 import {cookies} from 'next/headers';
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import HeaderStyle1 from "@/components/Header/styles/style1";
 import FooterStyle1 from "@/components/Footer/styles/style1";
 import "./globals.css";
@@ -11,11 +11,6 @@ import { CartProvider } from "@/context/CartContext";
 type Props = {
   children: React.ReactNode;
 };
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -30,11 +25,14 @@ export default async function RootLayout({children}: Props) {
   const store = await cookies();
   const locale = store.get('locale')?.value === 'ar' ? 'ar' : 'en';
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
+  
+  // Load messages for the locale
+  const messages = (await import(`../messages/${locale}.json`)).default;
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`}>
-        <NextIntlClientProvider>
+      <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`} >
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
             <Marquee/>
             <HeaderTopBar/>

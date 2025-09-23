@@ -1,7 +1,8 @@
 
 
-function HeaderTopBar() {
- 
+import {getTranslations} from 'next-intl/server';
+async function HeaderTopBar() {
+ const t = await getTranslations()
   return (
       <div className="site-topbar bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 py-3 flex items-center text-sm hidden lg:flex">
     <div className="container">
@@ -29,13 +30,13 @@ function HeaderTopBar() {
             <div>
                 <ul className="flex gap-4">
                     <li>
-                        <a href="#" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">About</a>
+                        <a href="#" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">{t("About")}</a>
                     </li>
                     <li>
-                        <a href="returns-page" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">Return & Exchange Policy</a>
+                        <a href="returns-page" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">{t("Return & Exchange Policy")}</a>
                     </li>
                     <li>
-                        <a href="shipping-page" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">Shipping & Delivery</a>
+                        <a href="shipping-page" className="hover:text-gray-800 dark:hover:text-gray-400 transition-colors duration-200">{t("Shipping & Delivery")}</a>
                     </li>
                 </ul>
 

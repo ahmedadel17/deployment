@@ -15,7 +15,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   const mainImageRef = useRef<HTMLDivElement>(null);
   const zoomLensRef = useRef<HTMLDivElement>(null);
 
-  const images = product.images || [product.image];
+  const images = product.images || [product.thumbnail || product.image];
   const mainImage = images[selectedImageIndex];
 
   const handleThumbnailClick = (index: number) => {
@@ -59,7 +59,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         >
           <Image
             src={mainImage}
-            alt={product.title}
+            alt={product.name || product.title}
             fill
             className="zoom-image w-full h-full object-cover"
             priority
@@ -124,7 +124,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             >
               <Image
                 src={image}
-                alt={`${product.title} ${index + 1}`}
+                alt={`${product.name || product.title} ${index + 1}`}
                 fill
                 className="object-cover"
               />

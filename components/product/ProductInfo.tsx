@@ -2,14 +2,16 @@
 
 import React, { useState } from 'react';
 import { Product } from '@/types/product';
+import { useCart } from '@/context/CartContext';
 
 interface ProductInfoProps {
   product: Product;
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] || '');
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || '');
+  const { addItem } = useCart();
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -17,10 +19,19 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const handleAddToCart = () => {
     setIsAddingToCart(true);
     
-    // Simulate adding to cart
+    // Add to cart using context
+    addItem({
+      id: String(product.id),
+      name: product.name || product.title,
+      price: Number(product.price_after_discount || product.price || 0),
+      quantity: quantity,
+      imageUrl: product.thumbnail || product.image,
+      color: selectedColor,
+      size: selectedSize,
+    });
+    
     setTimeout(() => {
       setIsAddingToCart(false);
-      // Show success message or redirect to cart
     }, 1000);
   };
 
@@ -56,7 +67,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {/* Product Title and Rating */}
       <div>
         <h1 className="product-title text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {product.title}
+          {product.name || product.title}
         </h1>
 
         <div className="product-rate flex items-center space-x-4">
@@ -77,20 +88,20 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {/* Price */}
       <div className="product-price flex items-baseline gap-2">
         <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">
-          ${product.price}
+          ${product.price_after_discount || product.price}
         </span>
-        {product.old_price && (
+        {product.min_price && product.min_price !== product.price_after_discount && (
           <span className="text-lg text-gray-500 dark:text-gray-400 line-through">
-            ${product.old_price}
+            ${product.min_price}
           </span>
         )}
       </div>
 
       {/* Description */}
-      {product.description && (
+      {(product.description || product.short_description) && (
         <div className="product-description">
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            {product.description}
+            {product.description || product.short_description}
           </p>
         </div>
       )}

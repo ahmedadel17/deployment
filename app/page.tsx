@@ -2,6 +2,7 @@ import BannersSection from "@/components/Banners/bannersSection";
 import FlexBanner from "@/components/Banners/FlexBanner";
 import LargeBanner from "@/components/Banners/LargeBanner";
 import FeaturedSection from "@/components/FeaturedSection";
+import Gallery from "@/components/Gallery";
 import ProductSlider from "@/components/ProductSlider";
 import Slider from "@/components/slider";
 import { get } from "@/lib/fetcher";
@@ -14,6 +15,7 @@ export default async function Home() {
     <>
       <Slider slides={homeData.data.sections.sliders.data} />
       <ProductSlider products={homeData.data.sections.featured_products.data} />
+      <Gallery />
       <BannersSection />
       {/* <ProductSlider /> */}
       <LargeBanner />

@@ -14,7 +14,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
     {
       id: 'description',
       label: 'Description',
-      content: product.description || 'No description available for this product.'
+      content: product.description || product.short_description || 'No description available for this product.'
     },
     {
       id: 'specifications',

@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { Heart, ShoppingCart, Eye, BarChart3 } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCart } from "@/context/CartContext";
-
+import { useTranslations } from 'next-intl';
 interface ProductCardProps {
   product: Product;
   carousel?: boolean;
 }
 
 export default function ProductCard({ product, carousel = false }: ProductCardProps) {
+  const t = useTranslations();
   const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
@@ -263,7 +264,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
             ) : (
               <>
                 <ShoppingCart className="w-4 h-4" />
-                Add to Cart
+                {t("Add to Cart")}
               </>
             )}
           </button>

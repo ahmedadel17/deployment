@@ -75,7 +75,7 @@ const HeaderCart: React.FC = () => {
       {/* Dropdown Content */}
       <div className={`cart-drop-down te-navbar-dropdown-content px-4 py-4 bg-white dark:bg-gray-800 max-w-[200px] ${isOpen ? 'te-dropdown-show' : ''}`}>
         <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-          Shopping Cart
+          {t("Shopping Cart")}
         </div>
 
         {/* Cart Items */}

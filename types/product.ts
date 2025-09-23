@@ -3,8 +3,13 @@ export interface Product {
   image: string;
   hover?: string;
   title: string;
-  price: string;
+  name?: string; // API field
+  price: string | number;
+  price_after_discount?: string | number; // API field
+  min_price?: string | number; // API field
   old_price?: string | null;
+  thumbnail?: string; // API field
+  short_description?: string; // API field
   colors: string[];
   sizes: string[];
   category: string;
