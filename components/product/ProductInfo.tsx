@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
+import { CartItem } from '@/types/cart';
 
 interface ProductInfoProps {
   product: Product;
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-  const { addItem } = useCart();
+  const { cartItems, setCartItems } = useCart();
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
   const [quantity, setQuantity] = useState(1);
@@ -18,18 +19,17 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = () => {
     setIsAddingToCart(true);
-    
-    // Add to cart using context
-    addItem({
-      id: String(product.id),
-      name: product.name || product.title,
-      price: Number(product.price_after_discount || product.price || 0),
-      quantity: quantity,
-      imageUrl: product.thumbnail || product.image,
-      color: selectedColor,
-      size: selectedSize,
-    });
-    
+    const item: CartItem = {
+      ...product,
+      name: String(product.name ?? product.title),
+      price_after_discount: Number(product.price_after_discount ?? product.price ?? 0),
+      thumbnail: String(product.thumbnail ?? '/assets/images/placeholder.jpg'),
+      quantity,
+      qty: quantity,
+      color: selectedColor || undefined,
+      size: selectedSize || undefined,
+    };
+    setCartItems([...cartItems, item]);
     setTimeout(() => {
       setIsAddingToCart(false);
     }, 1000);

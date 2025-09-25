@@ -10,10 +10,11 @@ export interface Product {
   old_price?: string | null;
   thumbnail?: string; // API field
   short_description?: string; // API field
+  is_is_favourite?: boolean; // API field: wishlist flag
   colors: string[];
   sizes: string[];
   category: string;
-  badges: ProductBadge[];
+  badges?: ProductBadge[];
   description?: string;
   rating?: number;
   reviews?: number;

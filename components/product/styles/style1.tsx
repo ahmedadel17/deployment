@@ -16,6 +16,7 @@ type Props = {
 export default function ProductStyle1({children}: Props) {
   const [order, setOrder] = useState('default')
   const [perPage, setPerPage] = useState('9') // maps to columns
+  const [currentPage, setCurrentPage] = useState(1)
 
   const gridCols = useMemo(() => {
     if (perPage === '6') return 2
@@ -90,8 +91,12 @@ export default function ProductStyle1({children}: Props) {
                 </div>
               </div>
 
-              {/* Pagination placeholder - plug in your pagination */}
-              <ProductPagination />
+              {/* Pagination */}
+              <ProductPagination 
+                currentPage={currentPage} 
+                totalPages={1} 
+                onPageChange={(page) => setCurrentPage(Math.max(1, page))} 
+              />
               <div />
 
             </div>

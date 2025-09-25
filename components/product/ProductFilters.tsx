@@ -45,7 +45,7 @@ export default function ProductFilters({
   const uniqueSizes = Array.from(new Set(allSizes));
 
   // Get price range
-  const prices = products.map(p => parseFloat(p.price.replace(',', '')));
+  const prices = products.map(p => parseFloat(String(p.price).replace(',', '')));
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
 

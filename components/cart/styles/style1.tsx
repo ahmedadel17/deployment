@@ -57,9 +57,9 @@ export default function CartStyle1() {
                       <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
                         <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
-                          <button onClick={() => updateQuantity(String(item.id), Math.max(1, item.quantity - 1))} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Decrease">-</button>
+                          {/* <button onClick={() => updateQuantity(String(item.id), Math.max(1, item.quantity - 1))} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Decrease">-</button> */}
                           <input type="number" value={item.quantity} readOnly className="w-16 !rounded-none border-0 focus:outline-none" />
-                          <button onClick={() => updateQuantity(String(item.id), item.quantity + 1)} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Increase">+</button>
+                          {/* <button onClick={() => updateQuantity(String(item.id), item.quantity + 1)} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Increase">+</button> */}
                         </div>
                       </div>
                     </div>

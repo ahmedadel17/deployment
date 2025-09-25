@@ -1,20 +1,13 @@
 'use client'
 import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
-
-type CartItem = {
-  title: string
-  image?: string
-  qty: number
-  price: string | number
-}
+import { CartItem } from '@/types/cart'
 
 type Props = {
   items: CartItem[]
-  onRemove?: (index: number) => void
 }
 
-export default function DropDownCartItem({items, onRemove}: Props) {
+export default function DropDownCartItem({items}: Props) {
   const { cartItems, setCartItems } = useCart();
   const removeItem = (index: number) => {
     setCartItems(cartItems.filter((_, i) => i !== index));
@@ -25,7 +18,7 @@ export default function DropDownCartItem({items, onRemove}: Props) {
         <div key={index} className="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex-shrink-0">
             {item.thumbnail && (
-              <Image width={100} height={100} src={item.thumbnail} alt={item.name} className="w-full h-full object-cover rounded-md" />
+              <Image width={100} height={100} src={item.thumbnail} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
             )}
           </div>
           <div className="flex-1 min-w-0">

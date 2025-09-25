@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ShoppingCart, Eye, BarChart3 } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types/product';
+import { CartItem } from '@/types/cart';
 import { useCart } from "@/context/CartContext";
 import { useTranslations } from 'next-intl';
 interface ProductCardProps {
@@ -14,30 +15,32 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, carousel = false }: ProductCardProps) {
   const t = useTranslations();
-  const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
-  const [isWishlisted, setIsWishlisted] = useState(product?.is_is_favourite);
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(Boolean(product?.is_is_favourite));
   const [isComparing, setIsComparing] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
-  const { addItem } = useCart();
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
   };
-  const { cartItems, setCartItems } = useCart( JSON.parse(localStorage.getItem('cart')||'[]'));
-  const addToCart = (product: any) => {
-    setCartItems([...cartItems, product]);
-    if(cartItems.length > 0){
-      localStorage.setItem('cart', JSON.stringify(cartItems));
-    }
+  const { cartItems, setCartItems } = useCart();
+  const addToCart = (item: Product) => {
+    const cartItem: CartItem = {
+      ...item,
+      name: String(item.name ?? item.title),
+      price_after_discount: Number(item.price_after_discount ?? item.price ?? 0),
+      thumbnail: String(item.thumbnail ?? '/assets/images/placeholder.jpg'),
+      quantity: 1,
+      qty: 1,
+    };
+    setCartItems([...cartItems, cartItem]);
   };
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const priceNumber = Number((product as any)?.price_after_discount ?? (product as any)?.price ?? 0);
     addToCart(product);
     setIsAddedToCart(true);
     setTimeout(() => setIsAddedToCart(false), 2000);
@@ -98,8 +101,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
       data-product-title={product.title}
       data-product-price={product.price}
       data-product-image={product.image}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      
     >
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-white dark:bg-gray-800">
@@ -119,7 +121,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
           )}
 
           {/* Hover Buttons - Center of Image */}
-          <div className="product-hover-btns absolute inset-0 pointer-events-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-30 z-20 flex gap-1">
+          <div className="product-hover-btns absolute inset-0 pointer-events-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-30 z-20 gap-1">
             {/* Compare Button */}
             <button
               onClick={handleCompareToggle}
@@ -153,7 +155,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
           {/* Thumbnail Main Image */}
           <Image
             src={product?.thumbnail || '/assets/images/placeholder.jpg'}
-            alt={product.name}
+            alt={product.name || ''}
             width={300}
             height={320}
             className="w-full h-full object-cover transition-all duration-500 ease-in-out transform min-h-[320px]"

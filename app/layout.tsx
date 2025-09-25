@@ -34,11 +34,15 @@ export default async function RootLayout({children}: Props) {
       <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`} >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
+        
+
             <Marquee/>
             <HeaderTopBar/>
             <HeaderStyle1 />
+        
             {children}
             <FooterStyle1 />
+          
           </CartProvider>
         </NextIntlClientProvider>
       </body>

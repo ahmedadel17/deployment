@@ -343,10 +343,18 @@ export const getProducts = (filters?: {
   if (filters?.sort) {
     switch (filters.sort) {
       case 'price_asc':
-        filteredProducts.sort((a, b) => parseFloat(a.price.replace(',', '')) - parseFloat(b.price.replace(',', '')));
+        filteredProducts.sort((a, b) => {
+          const aNum = typeof a.price === 'string' ? parseFloat(a.price.replace(/,/g, '')) : Number(a.price);
+          const bNum = typeof b.price === 'string' ? parseFloat(b.price.replace(/,/g, '')) : Number(b.price);
+          return aNum - bNum;
+        });
         break;
       case 'price_desc':
-        filteredProducts.sort((a, b) => parseFloat(b.price.replace(',', '')) - parseFloat(a.price.replace(',', '')));
+        filteredProducts.sort((a, b) => {
+          const aNum = typeof a.price === 'string' ? parseFloat(a.price.replace(/,/g, '')) : Number(a.price);
+          const bNum = typeof b.price === 'string' ? parseFloat(b.price.replace(/,/g, '')) : Number(b.price);
+          return bNum - aNum;
+        });
         break;
       case 'newest':
         filteredProducts.sort((a, b) => b.id - a.id);

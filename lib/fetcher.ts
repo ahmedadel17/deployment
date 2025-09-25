@@ -54,15 +54,13 @@ export async function request<T = unknown>(path: string, options: FetcherOptions
     }
 
     if (!parseJson) {
-      // @ts-expect-error caller expects a specific type
-      return (await res.text()) as T;
+      return (await res.text()) as unknown as T;
     }
 
     // Handle empty responses
     const contentLength = res.headers.get('content-length');
     if (contentLength === '0' || res.status === 204) {
-      // @ts-expect-error empty
-      return undefined as T;
+      return undefined as unknown as T;
     }
 
     return (await res.json()) as T;
