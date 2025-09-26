@@ -23,14 +23,16 @@ async function Page({ params }: PageProps) {
   
   const product = productData.data;
  return (
- <div className='container mx-auto py-4'>
+    <div className='dark:bg-gray-900'>
+
+ <div className='container mx-auto py-4  '>
    <div className="space-y-16">
 
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
     {/* <!-- Left Side - Image Slider --> */}
     <div>
-        <div className="sticky top-8 space-y-6">
+        <div className="sticky top-8 space-y-6 ">
           <ProductGallery product={product} />
         </div>
     </div>
@@ -232,6 +234,7 @@ async function Page({ params }: PageProps) {
 
 </div>
  </div>
+    </div>
  )
 }
 

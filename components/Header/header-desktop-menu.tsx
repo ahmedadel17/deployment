@@ -91,7 +91,7 @@ async function HeaderDesktopMenu() {
     </div>
     {/* <!-- .te-navbar-dropdown --> */}
 
-    <a href="products.php" className="te-navbar-link">{t("Products")}</a>
+    <Link href="/products" className="te-navbar-link">{t("Products")}</Link>
     <a href="cotton.php" className="te-navbar-link">{t("Cotton")}</a>
     <a href="blog.php" className="te-navbar-link">{t("Blog")}</a>
     <a href="contact.php" className="te-navbar-link">{t("Contact Us")}</a>

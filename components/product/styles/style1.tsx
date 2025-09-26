@@ -1,12 +1,13 @@
 'use client'
 
-import React, {useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import PriceWidget from '@/components/product/widgets/widget-price'
 import CategoryWidget from '@/components/product/widgets/widget-category'
 import VariableWidget from '@/components/product/widgets/widget-variable'
 import { products } from '@/data/products'
 import ProductCard from '../ProductCard'
 import ProductPagination from '../ProductPagination'
+import { get } from "@/lib/fetcher";
 
 type Props = {
   // Optional: render your own products grid inside
@@ -14,6 +15,14 @@ type Props = {
 }
 
 export default function ProductStyle1({children}: Props) {
+  const getProducts = async () => {
+    const productsData = await get<any>("/catalog/products", { next: { revalidate: 60 } }).catch(() => null);
+   setProducts(productsData.data.items)
+  }
+  useEffect(() => {
+    getProducts();
+  }, [])
+ const [products, setProducts] = useState<any[]>([]);
   const [order, setOrder] = useState('default')
   const [perPage, setPerPage] = useState('9') // maps to columns
   const [currentPage, setCurrentPage] = useState(1)
@@ -29,7 +38,7 @@ export default function ProductStyle1({children}: Props) {
   }, [perPage])
 
   return (
-    <section className="te-section">
+    <section className="te-section  dark:bg-gray-900">
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-4 gap-8">
 
@@ -80,7 +89,7 @@ export default function ProductStyle1({children}: Props) {
                   id="products-grid"
                   className={`grid gap-3 grid-cols-2 md:grid-cols-2 lg:grid-cols-${gridCols} ${gapClass}`}
                 >
-                  {products.map((product) => (
+                  {products?.map((product) => (
                 <div
                   key={product.id}
                   className="embla__slide flex-shrink-0 py-1 [flex:0_0_calc(50%-0.75rem)] md:[flex:0_0_calc(33.333%-0.75rem)] lg:[flex:0_0_calc(25%-1.2rem)]"

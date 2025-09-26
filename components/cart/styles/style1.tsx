@@ -15,7 +15,7 @@ export default function CartStyle1() {
   }
   const t = useTranslations()
   return (
-    <section className="te-section">
+    <section className="te-section dark:bg-gray-900">
       <div className="container">
         <div className="flex justify-between items-center mb-8">
           <div>

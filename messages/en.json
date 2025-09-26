@@ -102,5 +102,11 @@
       "Reviews":"Reviews",
       "Quantity":"Quantity",
       "Only":"Only",
-      "left in stock":"left in stock"
+      "left in stock":"left in stock",
+      "Description":"Description",
+      "Specifications":"Specifications",
+      "reviews":"reviews",
+      "Size":"size",
+      "Color":"Color"
+
   }

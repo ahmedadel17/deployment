@@ -143,7 +143,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       </div>
 
       {/* Tab Content */}
-      <div className="p-6">
+      <div className="p-6 dark:text-gray-400">
         {tabs.find(tab => tab.id === activeTab)?.content}
       </div>
     </div>

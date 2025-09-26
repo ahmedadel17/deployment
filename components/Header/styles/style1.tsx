@@ -49,6 +49,10 @@ function style1() {
                 </div>
 
                 {/* <!-- Dark Mode Toggle Button --> */}
+                <div className="items-center lg:hidden  gap-2">
+
+                <LanguageSwitcher />
+                </div>
                 <HeaderDarkMode />
 
                 {/* <!-- Mobile Menu Toggle Button --> */}

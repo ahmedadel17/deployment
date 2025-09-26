@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link';
 import React, { useState, useRef, useEffect } from 'react'
 
 function HeaderMobileMenu() {
@@ -14,7 +15,6 @@ function HeaderMobileMenu() {
         // Also check if the click is not on the toggle button
         const toggleButton = document.querySelector('.te-navbar-toggle');
         if (toggleButton && !toggleButton.contains(target)) {
-          console.log('Click outside detected, closing menu');
           setIsOpen(false);
           setOpenSubmenus(new Set());
         }
@@ -63,11 +63,11 @@ function HeaderMobileMenu() {
 <div className={`te-navbar-nav-mobile ${isOpen ? 'te-navbar-nav-mobile-show' : ''}`} id="mobile-navigation" aria-label="Mobile Navigation" ref={dropdownRef}>
     <div className="flex flex-col">
 
-        <a href="index.php" className="te-navbar-link-mobile te-navbar-link-active">Home</a>
+        <Link href="/" className="te-navbar-link-mobile te-navbar-link-active">Home</Link>
 
-        <a 
+        <a
           href="#" 
-          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu ${openSubmenus.has('men') ? 'te-mobile-submenu-open' : ''}`}
+          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu  dark:text-white${openSubmenus.has('men') ? 'te-mobile-submenu-open dark:text-white' : ''}`}
           onClick={(e) => {
             e.preventDefault();
             toggleSubmenu('men');
@@ -75,7 +75,7 @@ function HeaderMobileMenu() {
         >
           Men
         </a>
-        <div className={`te-navbar-submenu-mobile ${openSubmenus.has('men') ? 'te-submenu-mobile-open' : ''}`}>
+        <div className={`te-navbar-submenu-mobile  ${openSubmenus.has('men') ? 'te-submenu-mobile-open ' : ' '}`}>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
@@ -86,7 +86,7 @@ function HeaderMobileMenu() {
 
         <a 
           href="#" 
-          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu ${openSubmenus.has('women') ? 'te-mobile-submenu-open' : ''}`}
+          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu dark:text-white ${openSubmenus.has('women') ? 'te-mobile-submenu-open dark:text-white' : ''}`}
           onClick={(e) => {
             e.preventDefault();
             toggleSubmenu('women');
@@ -105,7 +105,7 @@ function HeaderMobileMenu() {
 
         <a 
           href="#" 
-          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu ${openSubmenus.has('kids') ? 'te-mobile-submenu-open' : ''}`}
+          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu dark:text-white ${openSubmenus.has('kids') ? 'te-mobile-submenu-open dark:text-white' : ''}`}
           onClick={(e) => {
             e.preventDefault();
             toggleSubmenu('kids');
@@ -124,7 +124,7 @@ function HeaderMobileMenu() {
 
         <a 
           href="#" 
-          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu ${openSubmenus.has('accessories') ? 'te-mobile-submenu-open' : ''}`}
+          className={`te-navbar-link-mobile te-navbar-link-mobile-has-submenu dark:text-white ${openSubmenus.has('accessories') ? 'te-mobile-submenu-open dark:text-white' : ''}`}
           onClick={(e) => {
             e.preventDefault();
             toggleSubmenu('accessories');
@@ -132,7 +132,7 @@ function HeaderMobileMenu() {
         >
           Accessories
         </a>
-        <div className={`te-navbar-submenu-mobile ${openSubmenus.has('accessories') ? 'te-submenu-mobile-open' : ''}`}>
+        <div className={`te-navbar-submenu-mobile dark:text-white ${openSubmenus.has('accessories') ? 'te-submenu-mobile-open dark:text-white' : ''}`}>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
             <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
@@ -140,10 +140,10 @@ function HeaderMobileMenu() {
         </div>
 
 
-        <a href="products.php" className="te-navbar-link-mobile">Products</a>
-        <a href="#" className="te-navbar-link-mobile">New Arrivals</a>
-        <a href="blog.php" className="te-navbar-link-mobile">Blog</a>
-        <a href="contact.php" className="te-navbar-link-mobile">Contact Us</a>
+        <Link href="/products" className="te-navbar-link-mobile dark:text-white">Products</Link>
+        <a href="#" className="te-navbar-link-mobile dark:text-white">New Arrivals</a>
+        <a href="blog.php" className="te-navbar-link-mobile dark:text-white">Blog</a>
+        <a href="contact.php" className="te-navbar-link-mobile dark:text-white">Contact Us</a>
 
     </div>
 </div>

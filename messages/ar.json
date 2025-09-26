@@ -99,8 +99,12 @@
   "Shipping & Delivery":"الشحن والتوصيل",
   "Return & Exchange Policy":"سياسة الإرجاع والتبديل",
   "In Stock":"في المخزن",
-  "Reviews":"التعليقات",
   "Quantity":"الكمية",
   "Only":"فقط",
-  "left in stock":"في المخزن"
+  "left in stock":"في المخزن",
+  "Description":"الوصف",
+  "Specifications":"المواصفات",
+  "reviews":"التعليقات",
+  "Size":"الحجم",
+  "Color":"اللون"
 }
