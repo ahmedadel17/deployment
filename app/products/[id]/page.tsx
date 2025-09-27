@@ -22,6 +22,7 @@ async function Page({ params }: PageProps) {
   });
   
   const product = productData.data;
+  console.log(product)
  return (
     <div className='dark:bg-gray-900'>
 
@@ -119,48 +120,34 @@ async function Page({ params }: PageProps) {
             </div>
 
             {/* <!-- Size Selection --> */}
-            <div className="product-size">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t("Size")}</h4>
+            {
+                product?.variations.map((variation)=>{
+                    return(
+                        <div className="product-size" key={variation.attribute_id}>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">{variation.attribute_name}</h4>
+               { variation.attribute_type!=="color"&&(
                 <div className="grid grid-cols-4 gap-2">
-                    <button className="size-option" data-size="XS" aria-label="Select size XS">XS</button>
-                    <button className="size-option" data-size="S" aria-label="Select size S">S</button>
-                    <button className="size-option" data-size="M" aria-label="Select size M">M</button>
-                    <button className="size-option" data-size="L" aria-label="Select size L">L</button>
-                    <button className="size-option" data-size="XL" aria-label="Select size XL">XL</button>
-                    <button className="size-option" data-size="XXL" aria-label="Select size XXL">XXL</button>
+                    {variation.values.map((value,index)=>(
+                        <button key={index} className="size-option" data-size={value.value} aria-label="Select size {value}">{value?.value}</button>
+                    ))}
                 </div>
-            </div>
-
-            {/* <!-- Color Selection --> */}
-            <div className="product-color">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t("Color")}</h4>
+               )}
+               { variation.attribute_type=="color"&&(
                 <div className="flex flex-wrap gap-3">
-                    <button className="color-option" style={{backgroundColor: "brown"}} data-color="brown" title="Brown" aria-label="Select color brown">
-                        <span className="sr-only">Brown</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "orange"}} data-color="orange" title="Orange" aria-label="Select color orange">
-                        <span className="sr-only">Orange</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "black"}} data-color="black" title="Black" aria-label="Select color black">
-                        <span className="sr-only">Black</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "white"}} data-color="white" title="White" aria-label="Select color white">
-                        <span className="sr-only">White</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "gray"}} data-color="gray" title="Gray" aria-label="Select color gray">
-                        <span className="sr-only">Gray</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "red"}} data-color="red" title="Red" aria-label="Select color red">
-                        <span className="sr-only">Red</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "blue"}} data-color="blue" title="Blue" aria-label="Select color blue">
-                        <span className="sr-only">Blue</span>
-                    </button>
-                    <button className="color-option" style={{backgroundColor: "green"}} data-color="green" title="Green" aria-label="Select color green">
-                        <span className="sr-only">Green</span>
-                    </button>
+                    {variation.values.map((value,index)=>(
+                       <button key={index} className="color-option" style={{backgroundColor: value.color}} data-color={value.color} title={value.value} aria-label="Select color ">
+                   </button>
+                    ))}
                 </div>
+               )}
+             
             </div>
+                    )
+                })
+            }
+            
+
+       
 
             <div className="space-y-2">
                 <label htmlFor="comment" className="block text-sm font-medium text-gray-900 dark:text-white">Do you have another comment?</label>

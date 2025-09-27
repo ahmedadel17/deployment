@@ -94,7 +94,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
 
   return (
     <div 
-      className={`product-item group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-200 dark:border-gray-700 ${
+      className={`lg:product-item group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-200 dark:border-gray-700 ${
         carousel ? 'flex-shrink-0' : ''
       }`}
       data-product-id={product.id}
@@ -222,7 +222,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
             </div>
           )}
 
-          {/* Size Options */}
+          {/* Size Options
           {product.sizes && product.sizes.length > 1 && (
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs text-gray-500">Sizes:</span>
@@ -242,7 +242,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
                 ))}
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Actions */}
@@ -265,8 +265,11 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
               </>
             ) : (
               <>
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-6 h-6 lg:w-4 lg:h-4" />
+                <span className='hidden lg:block'>
+
                 {t("Add to Cart")}
+                </span>
               </>
             )}
           </button>

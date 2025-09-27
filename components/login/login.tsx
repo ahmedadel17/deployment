@@ -29,21 +29,33 @@ function Login() {
         } 
         return errors;
       }}
-      onSubmit={async (values: PhoneFormValues, { setSubmitting }: FormikHelpers<PhoneFormValues>) => {
+      onSubmit={async (values: PhoneFormValues, { setSubmitting, setFieldError }: FormikHelpers<PhoneFormValues>) => {
         try {
-            const response = await axios.post("https://ecommerce.demo.asol-tec.com/api/auth/check-exists-user", ({phone: String(values.phone)}));
+            console.log('Login attempt with phone:', values.phone);
+            
+            const phoneData = { phone: `966${values.phone}` };
+            console.log('Sending data:', phoneData);
+            
+            const response = await axios.post("https://ecommerce.demo.asol-tec.com/api/auth/check-exists-user", phoneData);
+            console.log('API response:', response.data);
+            
             if(response.data.data.registered){
+               console.log('User is registered, redirecting to OTP');
                router.push("/auth2/otp");
             }
             else{
+                console.log('User not registered, redirecting to registration');
                 router.push("/auth2/Register?phone=" + values.phone);
             }
         
           } catch (error) {
+            console.error('Login error:', error);
             if (axios.isAxiosError(error)) {
               console.error("Axios error:", error.response?.data || error.message);
+              setFieldError('phone', 'Login failed. Please check your phone number and try again.');
             } else {
               console.error("Unexpected error:", error);
+              setFieldError('phone', 'An unexpected error occurred. Please try again.');
             }
           } finally {
             setSubmitting(false);

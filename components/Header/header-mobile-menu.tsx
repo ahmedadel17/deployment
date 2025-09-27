@@ -141,6 +141,7 @@ function HeaderMobileMenu() {
 
 
         <Link href="/products" className="te-navbar-link-mobile dark:text-white">Products</Link>
+        <Link href="/auth2/login" className="te-navbar-link-mobile dark:text-white">login</Link>
         <a href="#" className="te-navbar-link-mobile dark:text-white">New Arrivals</a>
         <a href="blog.php" className="te-navbar-link-mobile dark:text-white">Blog</a>
         <a href="contact.php" className="te-navbar-link-mobile dark:text-white">Contact Us</a>
