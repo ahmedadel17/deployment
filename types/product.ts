@@ -23,7 +23,22 @@ export interface Product {
   features?: string[];
   specifications?: Record<string, string>;
   images?: string[];
+  gallery?: Array<{ url: string; alt?: string }> | string[];
   variants?: ProductVariant[];
+  variations?: ProductVariation[];
+}
+
+export interface ProductVariation {
+  attribute_id: string;
+  attribute_name: string;
+  attribute_type: string;
+  values: ProductVariationValue[];
+}
+
+export interface ProductVariationValue {
+  id: string;
+  value: string;
+  color?: string;
 }
 
 export interface ProductBadge {

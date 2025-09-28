@@ -1,11 +1,13 @@
 'use client'
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react'
 
 function HeaderMobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -27,6 +29,12 @@ function HeaderMobileMenu() {
     };
   }, []);
 
+  // Close menu when navigating to a new page
+  useEffect(() => {
+    setIsOpen(false);
+    setOpenSubmenus(new Set());
+  }, [pathname]);
+
   const toggleMobileMenu = () => {
     const newIsOpen = !isOpen;
     console.log('Toggle clicked - current isOpen:', isOpen, 'newIsOpen:', newIsOpen);
@@ -44,6 +52,11 @@ function HeaderMobileMenu() {
       newOpenSubmenus.add(submenuName);
     }
     setOpenSubmenus(newOpenSubmenus);
+  };
+
+  const closeMenu = () => {
+    setIsOpen(false);
+    setOpenSubmenus(new Set());
   };
   return (
     <>
@@ -63,7 +76,7 @@ function HeaderMobileMenu() {
 <div className={`te-navbar-nav-mobile ${isOpen ? 'te-navbar-nav-mobile-show' : ''}`} id="mobile-navigation" aria-label="Mobile Navigation" ref={dropdownRef}>
     <div className="flex flex-col">
 
-        <Link href="/" className="te-navbar-link-mobile te-navbar-link-active">Home</Link>
+        <Link href="/" className="te-navbar-link-mobile te-navbar-link-active" onClick={closeMenu}>Home</Link>
 
         <a
           href="#" 
@@ -76,12 +89,12 @@ function HeaderMobileMenu() {
           Men
         </a>
         <div className={`te-navbar-submenu-mobile  ${openSubmenus.has('men') ? 'te-submenu-mobile-open ' : ' '}`}>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 4</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 5</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 6</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 1</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 2</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 3</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 4</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 5</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 6</a>
         </div>
 
         <a 
@@ -95,12 +108,12 @@ function HeaderMobileMenu() {
           Women
         </a>
         <div className={`te-navbar-submenu-mobile ${openSubmenus.has('women') ? 'te-submenu-mobile-open' : ''}`}>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 4</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 5</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 6</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 1</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 2</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 3</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 4</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 5</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 6</a>
         </div>
 
         <a 
@@ -114,12 +127,12 @@ function HeaderMobileMenu() {
           Kids
         </a>
         <div className={`te-navbar-submenu-mobile ${openSubmenus.has('kids') ? 'te-submenu-mobile-open' : ''}`}>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 4</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 5</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 6</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 1</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 2</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 3</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 4</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 5</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 6</a>
         </div>
 
         <a 
@@ -133,18 +146,18 @@ function HeaderMobileMenu() {
           Accessories
         </a>
         <div className={`te-navbar-submenu-mobile dark:text-white ${openSubmenus.has('accessories') ? 'te-submenu-mobile-open dark:text-white' : ''}`}>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 1</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 2</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 3</a>
-            <a href="#" className="te-navbar-submenu-mobile-link">Menu Link 4</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 1</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 2</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 3</a>
+            <a href="#" className="te-navbar-submenu-mobile-link" onClick={closeMenu}>Menu Link 4</a>
         </div>
 
 
-        <Link href="/products" className="te-navbar-link-mobile dark:text-white">Products</Link>
-        <Link href="/auth2/login" className="te-navbar-link-mobile dark:text-white">login</Link>
-        <a href="#" className="te-navbar-link-mobile dark:text-white">New Arrivals</a>
-        <a href="blog.php" className="te-navbar-link-mobile dark:text-white">Blog</a>
-        <a href="contact.php" className="te-navbar-link-mobile dark:text-white">Contact Us</a>
+        <Link href="/products" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Products</Link>
+        <Link href="/auth2/login" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>login</Link>
+        <a href="#" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>New Arrivals</a>
+        <a href="blog.php" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Blog</a>
+        <a href="contact.php" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Contact Us</a>
 
     </div>
 </div>

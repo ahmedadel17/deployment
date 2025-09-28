@@ -64,7 +64,7 @@ export default function ProductStyle1({children}: Props) {
                   {/* Order Select */}
                   <form className="flex items-center space-x-2 rtl:space-x-reverse">
                     <label htmlFor="order" className="sr-only">Sort by:</label>
-                    <select id="order" name="order" value={order} onChange={(e) => setOrder(e.target.value)}>
+                    <select className='w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500' id="order" name="order" value={order} onChange={(e) => setOrder(e.target.value)}>
                       <option value="default">Default</option>
                       <option value="price_asc">Price: Low to High</option>
                       <option value="price_desc">Price: High to Low</option>
@@ -75,7 +75,7 @@ export default function ProductStyle1({children}: Props) {
                   {/* Products Per Page / Grid Columns Select */}
                   <form className="hidden lg:flex items-center space-x-2 rtl:space-x-reverse">
                     <label htmlFor="per_page" className="sr-only">Products per page / grid columns:</label>
-                    <select id="per_page" name="per_page" value={perPage} onChange={(e) => setPerPage(e.target.value)}>
+                    <select className='w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500' id="per_page" name="per_page" value={perPage} onChange={(e) => setPerPage(e.target.value)}>
                       <option value="6">2 Columns</option>
                       <option value="9">3 Columns</option>
                       <option value="12">4 Columns</option>

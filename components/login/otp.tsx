@@ -15,45 +15,7 @@ function OTP() {
                     We sent a verification code to <span id="sent-to-phone" className="font-medium"></span>
                 </p>
             </div>
-
-            <form id="otp-form" className="space-y-6">
-                <div className="text-center">
-                   
-                   <Otp2/>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
-                        Enter the 6-digit code sent to your phone
-                    </p>
-                </div>
-
-                <div className="text-center">
-                    <button
-                        type="button"
-                        id="resend-otp"
-                        className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>
-                        <span id="resend-text">Resend code in </span>
-                        <span id="countdown">60</span>s
-                    </button>
-                </div>
-
-                <div className="flex space-x-4">
-                    <button
-                        type="button"
-                        id="back-to-phone-from-otp"
-                        className="te-btn te-btn-default">
-                        Change Phone
-                    </button>
-                    <button
-                        type="submit"
-                        id="otp-submit"
-                        className="te-btn te-btn-primary flex-1 flex justify-center items-center">
-                        <span id="otp-submit-text">Verify & Sign In</span>
-                        <div id="otp-loading" className="hidden ml-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        </div>
-                    </button>
-                </div>
-            </form>
+         <Otp2/>
         </div>
   )
 }

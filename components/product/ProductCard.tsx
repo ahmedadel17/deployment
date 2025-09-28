@@ -52,12 +52,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
     setIsComparing(!isComparing);
   };
 
-  const handleQuickView = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Implement quick view functionality
-    console.log('Quick view for product:', product.id);
-  };
+ 
 
   const getBadgeClasses = (type: string) => {
     const badgeClasses = {
@@ -123,7 +118,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
           {/* Hover Buttons - Center of Image */}
           <div className="product-hover-btns absolute inset-0 pointer-events-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-30 z-20 gap-1">
             {/* Compare Button */}
-            <button
+            {/* <button
               onClick={handleCompareToggle}
               className={`compare-btn w-8 h-8 lg:w-10 lg:h-10 bg-white text-gray-700 rounded-full shadow-lg hover:bg-primary-300 hover:text-white transition-all duration-200 flex items-center justify-center ${
                 isComparing ? 'bg-primary-300 text-white' : ''
@@ -137,11 +132,11 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
                 <path d="M13 6h3a2 2 0 0 1 2 2v7" />
                 <path d="M11 18H8a2 2 0 0 1-2-2V9" />
               </svg>
-            </button>
+            </button> */}
 
             {/* Quick View Button */}
-            <button
-              onClick={handleQuickView}
+            <Link
+            href={`/products/${product.id}`}
               className="quick-view-btn w-8 h-8 lg:w-10 lg:h-10 bg-white text-gray-700 rounded-full shadow-lg hover:bg-primary-300 hover:text-white transition-colors duration-200 flex items-center justify-center"
               title="Quick View"
             >
@@ -149,7 +144,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
               </svg>
-            </button>
+            </Link>
           </div>
 
           {/* Thumbnail Main Image */}
@@ -202,7 +197,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
           </div>
 
           {/* Color Options */}
-          {product.colors && product.colors.length > 1 && (
+          {/* {product.colors && product.colors.length > 1 && (
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs text-gray-500">Colors:</span>
               <div className="flex gap-1">
@@ -220,7 +215,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
                 ))}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Size Options
           {product.sizes && product.sizes.length > 1 && (
@@ -261,7 +256,8 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Added!
+                <span className='hidden lg:block'>Added!</span>
+             
               </>
             ) : (
               <>

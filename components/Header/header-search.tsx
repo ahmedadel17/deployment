@@ -1,8 +1,8 @@
 
 import React from 'react'
-import {getTranslations} from 'next-intl/server';
-async function HeaderSearch() {
-  const t = await getTranslations();
+import {useTranslations} from 'next-intl';
+ function HeaderSearch() {
+  const t = useTranslations();
   return (
     <div className="hidden lg:block w-96">
       <div className="relative">

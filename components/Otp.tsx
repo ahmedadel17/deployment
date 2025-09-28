@@ -1,8 +1,40 @@
 "use client"
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {useRouter} from 'next/navigation';
+import axios from "axios";
+import { useSearchParams } from 'next/navigation';
 export default function Otp2() {
-  const [otp, setOtp] = useState(Array(6).fill("")); // Array with 6 empty strings
+  const [otp, setOtp] = useState(Array(5).fill("")); // Array with 6 empty strings
+  const [registrationData, setRegistrationData] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const phone = searchParams.get('phone');
+  useEffect(()=>{
+    const registrationData = localStorage.getItem('registrationData');
+    setRegistrationData(registrationData);
+  },[]);
+  
+const handleSubmit=async()=>{
+  if(!phone){
+    const newRegistrationData={...JSON.parse(registrationData || '{}'), otp_code:String(otp.join(''))};
+    const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
+    localStorage.setItem('token', JSON.stringify(response.data.data.token));
+  localStorage.removeItem('registrationData');
+  router.push("/");
+
+
+
+  }else{
+    const newRegistrationData={phone:phone, otp_code:String(otp.join(''))};
+    const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
+    localStorage.setItem('token', JSON.stringify(response.data.data.token));
+  localStorage.removeItem('registrationData');
+  router.push("/");
+
+
+  }
+
+}
+
 const router = useRouter();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]); // Array of refs for each input field
 
@@ -68,17 +100,14 @@ const router = useRouter();
     const digits = text.split("");
     setOtp(digits);
   };
-  const handleSubmit = () => {
-    router.push("/Home");
-  }
 
   return (
     <>
   
       <div className="container">
         <div>
-   
-          <form  id="otp-form" className="flex gap-2">
+        <div id="otp-form" className="space-y-6">
+        <div id="otp-form" className="flex gap-2">
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -95,7 +124,45 @@ const router = useRouter();
                 className="shadow-xs flex w-[64px] items-center justify-center rounded-lg border border-stroke bg-white p-2 text-center text-2xl font-medium text-gray-5 outline-none sm:text-4xl dark:border-dark-3 dark:bg-white/5"
               />
             ))}
-          </form>
+          </div>
+                   <div className="text-center">
+   
+                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
+                           Enter the 6-digit code sent to your phone
+                       </p>
+                   </div>
+   
+                   <div className="text-center">
+                       <button
+                           type="button"
+                           id="resend-otp"
+                           className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                           disabled>
+                           <span id="resend-text">Resend code in </span>
+                           <span id="countdown">60</span>s
+                       </button>
+                   </div>
+   
+                   <div className="flex space-x-4">
+                       <button
+                           type="button"
+                           id="back-to-phone-from-otp"
+                           className="te-btn te-btn-default">
+                           Change Phone
+                       </button>
+                       <button
+                           onClick={handleSubmit}
+                           id="otp-submit"
+                           className="te-btn te-btn-primary flex-1 flex justify-center items-center">
+                           <span id="otp-submit-text">Verify & Sign In</span>
+                           <div id="otp-loading" className="hidden ml-2">
+                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                           </div>
+                       </button>
+                   </div>
+               </div>
+
+         
         </div>
       </div>
       

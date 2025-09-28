@@ -33,19 +33,17 @@ function Login() {
         try {
             console.log('Login attempt with phone:', values.phone);
             
-            const phoneData = { phone: `966${values.phone}` };
-            console.log('Sending data:', phoneData);
+            const phoneData = { phone: `+966${values.phone}` };
             
-            const response = await axios.post("https://ecommerce.demo.asol-tec.com/api/auth/check-exists-user", phoneData);
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/check-exists-user", phoneData);
             console.log('API response:', response.data);
             
             if(response.data.data.registered){
-               console.log('User is registered, redirecting to OTP');
-               router.push("/auth2/otp");
+               router.push("/auth2/otp?phone="+ values.phone);
             }
             else{
                 console.log('User not registered, redirecting to registration');
-                router.push("/auth2/Register?phone=" + values.phone);
+                router.push("/auth2/Register" );
             }
         
           } catch (error) {

@@ -14,16 +14,16 @@ async function page() {
     <div>
         <Slider slides={homeData.data.sections.sliders.data} />
       <ProductSlider products={homeData.data.sections.featured_products.data} />
-      <Gallery />
+      {/* <Gallery /> */}
       
-      <BannersSection />
+      {/* <BannersSection /> */}
       {/* <ProductSlider /> */}
-      <LargeBanner />
+      {/* <LargeBanner /> */}
       {/* <ProductSlider /> */}
-      <FlexBanner />
+      {/* <FlexBanner /> */}
       {/* <ProductSlider /> */}
 
-      <FeaturedSection />
+      {/* <FeaturedSection /> */}
     </div>
   )
 }

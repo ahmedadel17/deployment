@@ -4,15 +4,17 @@ import React from 'react'
 import { Formik, FormikHelpers } from 'formik';
 import axios from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 // import { useRouter } from 'next/navigation';
 function Registeration() {
+  
     interface RegisterFormValues {
         phone: string;
         name: string;
         email: string;
         terms: boolean | string;
       }
-      // const router = useRouter();
+      const router = useRouter();
   return (
     <div>
           {/* <!-- Registration Step (Hidden by default) --> */}
@@ -46,14 +48,13 @@ function Registeration() {
       }}
       onSubmit={async (values: RegisterFormValues, { setSubmitting, setFieldError }: FormikHelpers<RegisterFormValues>) => {
         try {
-            console.log('Registration values:', values);
             
             // Prepare the data for the API
             const registrationData = {
               name: values.name,
               email: values.email,
-              phone: `966${values.phone}`,
-              terms_accepted: values.terms
+              phone: `+966${values.phone}`,
+              terms_accepted: values.terms,
             };
             
             // Uncomment and use the actual API call when ready
@@ -61,12 +62,8 @@ function Registeration() {
             // console.log('Registration response:', response.data);
             
             // For now, just log the data and show success
-            console.log('Registration data prepared:', registrationData);
-            alert('Registration form submitted successfully! (API call commented out)');
-            
-            // Navigate to OTP page after successful registration
-            // router.push("/auth2/otp");
-        
+            localStorage.setItem('registrationData', JSON.stringify(registrationData));
+            router.push("/auth2/otp");
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error("Axios error:", error.response?.data || error.message);

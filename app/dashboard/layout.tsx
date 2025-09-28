@@ -6,12 +6,51 @@ export const metadata: Metadata = {
   title: "My Shop",
   description: "E-commerce App with Cart Context",
 };
+interface DashboardData {
+  user: {
+    name: string;
+    email: string;
+    initials: string;
+  };
+  stats: {
+    walletBalance: string;
+    rewardPoints: number;
+    totalSpent: string;
+    wishlistItems: number;
+    totalOrders: number;
+  };
+  loyalty: {
+    currentLevel: string;
+    nextLevel: string;
+    pointsToNext: number;
+    progressPercentage: number;
+  };
+  recentOrders: Order[];
+  wishlistItems: WishlistItem[];
+}
+
+interface Order {
+  id: string;
+  date: string;
+  status: {
+    text: string;
+    color: string;
+  };
+  total: string;
+}
+
+interface WishlistItem {
+  title: string;
+  image: string;
+  price: string;
+}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
     const defaultData: DashboardData = {
         user: {
           name: 'Ahmed Al-Rashid',
