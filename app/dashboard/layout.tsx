@@ -1,6 +1,7 @@
 // app/layout.tsx
 import DashboardSidebar from "@/components/Dashboard/DashboardSidebar";
 import type { Metadata } from "next";
+import ThemeInitializer from '@/components/ThemeInitializer';
 
 export const metadata: Metadata = {
   title: "My Shop",
@@ -87,6 +88,7 @@ export default function RootLayout({
   return (
 
    <>
+    <ThemeInitializer />
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

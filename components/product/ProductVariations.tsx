@@ -149,7 +149,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                      )}
                  {productWithVariations && !isUpdatingVariations && <span className="text-lg text-gray-500 dark:text-gray-400 line-through">
                      <span className="icon-riyal-symbol"></span>
-                     <span>{productWithVariations?.old_price}</span>
+                     <span>{productWithVariations?.price_befor_discount}</span>
                  </span>}
              </div>
 

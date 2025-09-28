@@ -26,6 +26,8 @@ export interface Product {
   gallery?: Array<{ url: string; alt?: string }> | string[];
   variants?: ProductVariant[];
   variations?: ProductVariation[];
+  price_befor_discount?: string | number;
+  
 }
 
 export interface ProductVariation {

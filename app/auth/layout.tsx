@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-
+import ThemeInitializer from '@/components/ThemeInitializer';
 
 type Props = {
   children: React.ReactNode;
@@ -17,9 +17,10 @@ export default async function RootLayout({children}: Props) {
 
   return (
     <>
-    <div className='flex justify-center items-center h-screen'>
+    <ThemeInitializer />
+    <div className='flex justify-center items-center h-screen dark:bg-gray-900'>
 
-     <div className="max-w-md border  mx-auto text-center bg-white px-4 sm:px-8 py-10 rounded-xl shadow">
+     <div className="max-w-md border border-gray-200 dark:border-gray-700 mx-auto text-center bg-white dark:bg-gray-800 px-4 sm:px-8 py-10 rounded-xl shadow">
    
     {children}
    </div>

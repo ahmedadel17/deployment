@@ -8,6 +8,7 @@ import "./globals.css";
 import HeaderTopBar from "@/components/Header/header-top-bar";
 import Marquee from "@/components/Header/marquee";
 import { CartProvider } from "@/context/CartContext";
+import ThemeInitializer from "@/components/ThemeInitializer";
 type Props = {
   children: React.ReactNode;
 };
@@ -31,9 +32,34 @@ export default async function RootLayout({children}: Props) {
 
   return (
     <html lang={locale} dir={dir}>
+      <head>
+        {/* Theme initialization script to prevent FOUC */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  
+                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // Fallback to light mode if localStorage is not available
+                  document.documentElement.classList.remove('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`} >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
+            <ThemeInitializer />
         
 
             <Marquee/>

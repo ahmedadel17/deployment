@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
+import ThemeInitializer from '@/components/ThemeInitializer';
 
 export const metadata: Metadata = {
   title: "My Shop",
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
 
    <>
+        <ThemeInitializer />
         {children}
    </>
     

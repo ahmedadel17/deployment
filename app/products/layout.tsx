@@ -1,16 +1,12 @@
 import {cookies} from 'next/headers';
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import ThemeInitializer from '@/components/ThemeInitializer';
 
 
 type Props = {
   children: React.ReactNode;
 };
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -28,10 +24,33 @@ export default async function RootLayout({children}: Props) {
 
   return (
     <html lang={locale} dir={dir}>
+      <head>
+        {/* Theme initialization script to prevent FOUC */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('theme');
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  
+                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // Fallback to light mode if localStorage is not available
+                  document.documentElement.classList.remove('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`}>
-     
-          {children}
-       
+        <ThemeInitializer />
+        {children}
       </body>
     </html>
   );
