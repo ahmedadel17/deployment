@@ -24,9 +24,15 @@ function Login() {
       initialValues={{ phone: ''}}
       validate={(values: PhoneFormValues) => {
         const errors: Partial<Record<keyof PhoneFormValues, string>> = {};
+        
         if (!values.phone) {
-          errors.phone = 'Required';
-        } 
+          errors.phone = 'Phone number is required';
+        } else if (!/^5[0-9]{8}$/.test(values.phone)) {
+          errors.phone = 'Please enter a valid Saudi phone number (5XXXXXXXX)';
+        } else if (values.phone.length !== 9) {
+          errors.phone = 'Phone number must be exactly 9 digits';
+        }
+        
         return errors;
       }}
       onSubmit={async (values: PhoneFormValues, { setSubmitting, setFieldError }: FormikHelpers<PhoneFormValues>) => {
@@ -43,7 +49,7 @@ function Login() {
             }
             else{
                 console.log('User not registered, redirecting to registration');
-                router.push("/auth2/Register" );
+                router.push("/auth2/Register?phone="+ values.phone);
             }
         
           } catch (error) {
@@ -84,10 +90,25 @@ function Login() {
                     id="phone"
                     name="phone"
                     required
-                    className="block w-full ps-16 pr-5 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                    maxLength={9}
+                    disabled={isSubmitting}
+                    className={`block w-full ps-16 pr-5 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white ${
+                      errors.phone && touched.phone 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    } ${isSubmitting ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600' : ''}`}
                     placeholder="5XXXXXXXX"
                     pattern="5[0-9]{8}"
-                    onChange={handleChange}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      // Only allow digits and limit to 9 characters
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 9);
+                      handleChange({
+                        target: {
+                          name: 'phone',
+                          value: value
+                        }
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
                     onBlur={handleBlur}
                     value={values.phone}
                     />
@@ -95,7 +116,22 @@ function Login() {
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Enter your Saudi phone number (starting with 5)
             </p>
-            <p className='text-red-500'>{errors.phone && touched.phone && errors.phone}</p>
+            {errors.phone && touched.phone && (
+              <p className="mt-1 text-xs text-red-500 dark:text-red-400 flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errors.phone}
+              </p>
+            )}
+            {!errors.phone && touched.phone && values.phone && /^5[0-9]{8}$/.test(values.phone) && (
+              <p className="mt-1 text-xs text-green-500 dark:text-green-400 flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Valid phone number
+              </p>
+            )}
         </div>
 
         <div>
@@ -103,11 +139,17 @@ function Login() {
                 type="submit"
                 id="phone-submit"
                 disabled={isSubmitting}
-                className="te-btn te-btn-primary w-full flex justify-center items-center">
-                <span id="phone-submit-text">Continue</span>
-                <div id="phone-loading" className="hidden ml-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                </div>
+                className={`te-btn te-btn-primary w-full flex justify-center items-center ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <span>Checking...</span>
+                  </>
+                ) : (
+                  <span>Continue</span>
+                )}
             </button>
         </div>
     </form>

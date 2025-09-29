@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // ✅ disables ESLint during build
   },
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       {

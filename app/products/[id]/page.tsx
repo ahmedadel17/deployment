@@ -3,6 +3,8 @@ import { get } from '@/lib/fetcher'
 import ProductPageClient from '@/components/product/ProductPageClient'
 import ProductTabs from '@/components/product/ProductTabs'
 import { Product } from '@/types/product'
+import getRequest from '@/lib/getter'
+import { getLocale } from 'next-intl/server'
 
 interface PageProps {
   params: Promise<{
@@ -12,8 +14,10 @@ interface PageProps {
 
 async function Page({ params }: PageProps) {
   const { id } = await params;
-  const productData = await get<{ data: Product }>(`/catalog/products/details/${id}`, { 
-    next: { revalidate: 60 } // Cache for 60 seconds
+
+  const locale = await getLocale();
+  const productData= await getRequest(`/catalog/products/details/${id}`, {
+    'Accept-Language': locale,
   });
   
   const product = productData.data;

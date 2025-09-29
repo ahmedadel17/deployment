@@ -24,11 +24,19 @@ function LanguageSwitcher() {
     
     const changeLanguage = (locale: string, event: React.MouseEvent) => {
         event.preventDefault();
-        // overwrite cookie
-        document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`;
-        setLocale(locale);
-        // refresh page so server picks new cookie
-        router.refresh();
+        try {
+          // overwrite cookie
+          document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`;
+          setLocale(locale);
+          // Use window.location.reload() for more reliable page refresh
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } catch (error) {
+          console.error('Error changing language:', error);
+          // Fallback to router.refresh()
+          router.refresh();
+        }
       };
     return (
       <div className="te-navbar-dropdown">

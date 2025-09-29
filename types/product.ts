@@ -19,6 +19,7 @@ export interface Product {
   rating?: number;
   reviews?: number;
   stock?: string;
+  sku?: string; // Stock Keeping Unit
   merchant?: string;
   features?: string[];
   specifications?: Record<string, string>;

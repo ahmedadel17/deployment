@@ -4,6 +4,7 @@ export type FetcherOptions = (RequestInit & {
   params?: QueryParams;
   timeoutMs?: number;
   parseJson?: boolean; // default true
+  locale?: string; // Optional locale for Accept-Language header
 }) & {
   // Next.js fetch options (optional)
   next?: { revalidate?: number; tags?: string[] };
@@ -25,7 +26,7 @@ function buildUrl(input: string, params?: QueryParams) {
 }
 
 export async function request<T = unknown>(path: string, options: FetcherOptions = {}): Promise<T> {
-  const { params, timeoutMs = DEFAULT_TIMEOUT_MS, parseJson = true, headers, ...rest } = options;
+  const { params, timeoutMs = DEFAULT_TIMEOUT_MS, parseJson = true, headers, locale, ...rest } = options;
   const url = buildUrl(path, params);
 
   const controller = new AbortController();
@@ -36,6 +37,7 @@ export async function request<T = unknown>(path: string, options: FetcherOptions
       ...rest,
       headers: {
         'Accept': 'application/json',
+        ...(locale ? { 'Accept-Language': locale } : {}),
         ...(rest.body && !(headers && 'Content-Type' in headers) ? { 'Content-Type': 'application/json' } : {}),
         ...(headers || {}),
       },
@@ -84,4 +86,22 @@ export const patch = <T = unknown, B = unknown>(path: string, body?: B, options?
 export const del = <T = unknown>(path: string, options?: Omit<FetcherOptions, 'method' | 'body'>) =>
   request<T>(path, { ...options, method: 'DELETE' });
 
+// Server-side helper that automatically includes locale from cookies
+export async function getWithLocale<T = unknown>(path: string, options?: Omit<FetcherOptions, 'method' | 'body' | 'locale'>) {
+  // This function should only be called from Server Components
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('locale')?.value || 'en';
+  
+  return get<T>(path, { ...options, locale });
+}
+
+export async function postWithLocale<T = unknown, B = unknown>(path: string, body?: B, options?: Omit<FetcherOptions, 'method' | 'body' | 'locale'>) {
+  // This function should only be called from Server Components
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('locale')?.value || 'en';
+  
+  return post<T, B>(path, body, { ...options, locale });
+}
 

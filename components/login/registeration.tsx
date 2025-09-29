@@ -5,16 +5,20 @@ import { Formik, FormikHelpers } from 'formik';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 // import { useRouter } from 'next/navigation';
 function Registeration() {
   
     interface RegisterFormValues {
         phone: string;
-        name: string;
+        first_name: string;
+        last_name: string;
         email: string;
-        terms: boolean | string;
+        terms: boolean;
       }
       const router = useRouter();
+      const phone=useSearchParams().get('phone');
+      
   return (
     <div>
           {/* <!-- Registration Step (Hidden by default) --> */}
@@ -25,11 +29,20 @@ function Registeration() {
             </div>
 
             <Formik<RegisterFormValues>
-      initialValues={{ phone: '', name: '', email: '', terms: false }}
+      initialValues={{ 
+        phone: phone || '', 
+        first_name: '', 
+        last_name: '', 
+        email: '', 
+        terms: false 
+      }}
       validate={(values: RegisterFormValues) => {
         const errors: Partial<Record<keyof RegisterFormValues, string>> = {};
-        if (!values.name) {
-          errors.name = 'Full name is required';
+        if (!values.first_name) {
+          errors.first_name = 'First name is required';
+        }
+        if (!values.last_name) {
+          errors.last_name = 'Last name is required';
         }
         if (!values.email) {
           errors.email = 'Email is required';
@@ -51,7 +64,8 @@ function Registeration() {
             
             // Prepare the data for the API
             const registrationData = {
-              name: values.name,
+              first_name: values.first_name,
+              last_name: values.last_name,
               email: values.email,
               phone: `+966${values.phone}`,
               terms_accepted: values.terms,
@@ -88,23 +102,48 @@ function Registeration() {
         /* and other goodies */
       }) => (
         <form id="register-form" className="space-y-6" onSubmit={handleSubmit}>
-        <div>
+       <div className='flex flex-row gap-4'>
+       <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Full Name *
+                First Name
             </label>
             <input
                 type="text"
-                id="name"
-                name="name"
+                id="first_name"
+                name="first_name"
                 required
-                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2"
-                placeholder="Enter your full name"
+                disabled={isSubmitting}
+                className={`block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                placeholder="Enter your First name"
                 onChange={handleChange}
                 onBlur={handleBlur}
-                value={values.name}
+                value={values.first_name}
                 />
-                {errors.name && touched.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                {errors.first_name && touched.first_name && <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>}
         </div>
+        <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Last Name
+            </label>
+            <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                required
+                disabled={isSubmitting}
+                className={`block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                placeholder="Enter your Last name"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.last_name}
+                />
+                {errors.last_name && touched.last_name && <p className="mt-1 text-sm text-red-500">{errors.last_name}</p>}
+        </div>
+       </div>
 
         <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -114,7 +153,10 @@ function Registeration() {
                 type="email"
                 id="email"
                 name="email"
-                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2"
+                disabled={isSubmitting}
+                className={`block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 required
                 placeholder="Enter your email address"
                 onChange={handleChange}
@@ -126,7 +168,7 @@ function Registeration() {
 
         <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Phone Number
+                Phone Number {phone && <span className="text-green-600 text-xs">(Pre-filled from login)</span>}
             </label>
             <div className="mt-1 relative">
                 <div className="absolute inset-y-0 start-00 ps-3 flex items-center pointer-events-none">
@@ -136,10 +178,25 @@ function Registeration() {
                     type="tel"
                     id="phone"
                     name="phone"
-                    className="block w-full ps-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
+                    maxLength={9}
+                    disabled={isSubmitting}
+                    className={`block w-full ps-12 pr-3 py-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 ${
+                      errors.phone && touched.phone 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     placeholder="5XXXXXXXX"
                     pattern="5[0-9]{8}"
-                    onChange={handleChange}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      // Only allow digits and limit to 9 characters
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 9);
+                      handleChange({
+                        target: {
+                          name: 'phone',
+                          value: value
+                        }
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
                     onBlur={handleBlur}
                     value={values.phone}
                     />
@@ -154,7 +211,10 @@ function Registeration() {
                     name="terms"
                     type="checkbox"
                     required
-                    className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+                    disabled={isSubmitting}
+                    className={`focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     checked={values.terms === true}
@@ -181,11 +241,17 @@ function Registeration() {
                 type="submit"
                 id="register-submit"
                 disabled={isSubmitting}
-                className="te-btn te-btn-primary flex-1 flex justify-center items-center">
-                <span id="register-submit-text">Create Account</span>
-                <div id="register-loading" className="hidden ml-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                </div>
+                className={`te-btn te-btn-primary flex-1 flex justify-center items-center ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
             </button>
         </div>
     </form>

@@ -1,18 +1,20 @@
-import BannersSection from '@/components/Banners/bannersSection';
-import FlexBanner from '@/components/Banners/FlexBanner';
-import LargeBanner from '@/components/Banners/LargeBanner';
-import FeaturedSection from '@/components/FeaturedSection';
-import Gallery from '@/components/Gallery';
 import ProductSlider from '@/components/ProductSlider';
 import Slider from '@/components/slider';
-import { get } from "@/lib/fetcher";
+import getRequest from '@/lib/getter';
+import { getLocale } from 'next-intl/server';
 import React from 'react'
 
+// Main page component with loading states
 async function page() {
-    const homeData = await get<any>("/home-v2", { next: { revalidate: 60 } }).catch(() => null);
+  const locale = await getLocale();
+  const homeData = await getRequest(`/home-v2`, {
+    'Accept-Language': locale,
+  });
+  console.log(homeData);
+
   return (
     <div>
-        <Slider slides={homeData.data.sections.sliders.data} />
+      <Slider slides={homeData.data.sections.sliders.data} />
       <ProductSlider products={homeData.data.sections.featured_products.data} />
       {/* <Gallery /> */}
       

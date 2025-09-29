@@ -6,10 +6,18 @@ export default function LanguageSwitch() {
   const router = useRouter();
 
   const changeLanguage = (locale: string) => {
-    // overwrite cookie
-    document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    // refresh page so server picks new cookie
-    router.refresh();
+    try {
+      // overwrite cookie
+      document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`;
+      // Use window.location.reload() for more reliable page refresh
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error('Error changing language:', error);
+      // Fallback to router.refresh()
+      router.refresh();
+    }
   };
 
   return (

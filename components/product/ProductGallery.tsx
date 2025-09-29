@@ -3,21 +3,17 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Product } from '@/types/product';
-import axios from 'axios';
 import useEmblaCarousel from 'embla-carousel-react';
 
 interface ProductGalleryProps {
   product: Product;
   selectedVariations?: { [attributeId: string]: string };
+  productWithVariations?: Product | null;
 }
 
-interface SelectedVariations {
-  [attributeId: string]: string;
-}
 
-export default function ProductGallery({ product, selectedVariations }: ProductGalleryProps) {
+export default function ProductGallery({ product, selectedVariations, productWithVariations }: ProductGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -103,33 +99,12 @@ export default function ProductGallery({ product, selectedVariations }: ProductG
  
 
 
-  const getProductByVariations = useCallback(async (variations: SelectedVariations) => {
-    try {
-      const requestBody = {
-        product_id: product.id.toString(),
-        attributes: variations
-      };
-
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL + `/catalog/products/get-variation-by-attribute`, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      setProductWithVariations(response.data.data);
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching product variations:', error);
-      throw error;
-    }
-  }, [product.id]);
-
-  // Console log variations when they change
+  // Console log variations when they change (no API call)
   useEffect(() => {
     if (selectedVariations && Object.keys(selectedVariations).length > 0) {
       console.log('Selected variations in ProductGallery:', selectedVariations);
-      getProductByVariations(selectedVariations);
     }
-  }, [selectedVariations, getProductByVariations]);
+  }, [selectedVariations]);
 
   const handleThumbnailClick = (index: number) => {
     scrollTo(index);

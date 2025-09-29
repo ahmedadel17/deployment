@@ -5,6 +5,10 @@ import ProductGallery from './ProductGallery';
 import ProductVariations from './ProductVariations';
 import { Product, ProductVariation } from '@/types/product';
 import { useTranslations } from 'next-intl';
+import { Formik, Form, Field } from 'formik';
+import axios from 'axios';
+import { useCart } from '@/context/CartContext';
+import postRequest from '@/lib/post';
 
 interface ProductPageClientProps {
   product: Product;
@@ -17,25 +21,20 @@ interface SelectedVariations {
 
 export default function ProductPageClient({ product, variations }: ProductPageClientProps) {
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariations>({});
+  const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { cartItems, setCartItems } = useCart();
   const t = useTranslations();
 
   const handleVariationChange = (variations: SelectedVariations) => {
     setSelectedVariations(variations);
-    console.log('Variations changed in ProductPageClient:', variations);
   };
 
-  const handleAddToCart = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Adding to cart:', product);
-      // TODO: Implement actual add to cart logic
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleProductWithVariationsChange = (product: Product | null) => {
+    setProductWithVariations(product);
   };
+
+  
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -45,6 +44,7 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
           <ProductGallery 
             product={product} 
             selectedVariations={selectedVariations}
+            productWithVariations={productWithVariations}
           />
         </div>
       </div>
@@ -58,10 +58,42 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
               variations={variations} 
               product={product}
               onVariationChange={handleVariationChange}
+              onProductWithVariationsChange={handleProductWithVariationsChange}
             />
           ) : (
             /* Product without variations */
-            <>
+            <Formik
+              initialValues={{ qty: 1, customer_note: '' }}
+              onSubmit={async (values) => {
+                setIsLoading(true);
+                try {
+                  const token = JSON.parse(localStorage.getItem('token') || 'null');
+                  const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product.id, type: 'product' }, 
+                    { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
+                  
+               
+                  
+                  // Add products from response to cart context
+                  if (response.data.data.products && Array.isArray(response.data.data.products)) {
+                    setCartItems(prevItems => {
+                      const newItems = [...prevItems, ...response.data.data.products];
+                      console.log('Updated cart state:', newItems);
+                      // Update localStorage immediately
+                      localStorage.setItem('cart', JSON.stringify(newItems));
+                      console.log('Updated localStorage cart:', JSON.parse(localStorage.getItem('cart') || '[]'));
+                      return newItems;
+                    });
+                  }
+                } catch (error) {
+                  const err = error as unknown as { response?: { data?: unknown } } & { message?: string };
+                  console.error('Failed to add to cart:', err.response?.data || err.message || error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {({ setFieldValue, values }) => (
+                <Form >
               {/* Product Title and Rating */}
               <div>
                 <h1 className="product-title text-3xl font-bold text-gray-900 dark:text-white mb-2">{product?.name}</h1>
@@ -121,18 +153,18 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
                   <div className="flex items-center rtl:flex-row-reverse border border-gray-300 dark:border-gray-600 rounded-md">
                     {/* Decrease Button */}
-                    <button className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <button type="button" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.max(1, Number(values.qty) - 1))}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4"></path>
                       </svg>
                     </button>
 
                     {/* Quantity Input */}
-                    <input type="number" value="1" min="1" max="10"
-                      className="w-16 !rounded-none border-0 focus:outline-none text-center"/>
+                    <Field name="qty" type="number" min="1" max="10"
+                      className="w-16 !rounded-none border-0 focus:outline-none text-center" />
 
                     {/* Increase Button */}
-                    <button className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <button type="button" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.min(10, Number(values.qty) + 1))}>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                       </svg>
@@ -149,13 +181,13 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
               {/* Comment Section */}
               <div className="space-y-2">
                 <label htmlFor="comment" className="block text-sm font-medium text-gray-900 dark:text-white">Do you have another comment?</label>
-                <textarea id="comment" name="comment" rows={3} className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter your comment here..."></textarea>
+                <Field as="textarea" id="customer_note" name="customer_note" rows={3} className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter your comment here..."></Field>
               </div>
 
               {/* Action Buttons */}
               <div className="product-actions space-y-3">
                 <button 
-                  onClick={handleAddToCart}
+                  type="submit"
                   className={`w-full py-1 product-add-to-cart flex-1 te-btn te-btn-primary flex gap-2 items-center justify-center ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'
                   }`}
@@ -217,7 +249,9 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
                   <a href="/tag/men" className="text-primary-600 dark:text-primary-200 hover:underline">Men</a>
                 </p>
               </div>
-            </>
+                </Form>
+              )}
+            </Formik>
           )}
         </div>
       </div>

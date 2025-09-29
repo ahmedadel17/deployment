@@ -17,8 +17,8 @@ export default function DropDownCartItem({items}: Props) {
       {items.map((item, index) => (
         <div key={index} className="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex-shrink-0">
-            {item.thumbnail && (
-              <Image width={100} height={100} src={item.thumbnail} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
+            {item.image && (
+              <Image width={100} height={100} src={item.image} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -26,7 +26,7 @@ export default function DropDownCartItem({items}: Props) {
               <a href="#" className="hover:text-primary-400">{item.name}</a>
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              Qty: {item.qty} × <span className="icon-riyal-symbol text-xs" /> <span>{item.price_after_discount}</span>
+              Qty: {item.qty} × <span className="icon-riyal-symbol text-xs" /> <span>{item.price}</span>
             </div>
           </div>
           <button onClick={() => removeItem(index)} className="text-gray-400 hover:text-red-500 transition-colors" aria-label="Remove item">

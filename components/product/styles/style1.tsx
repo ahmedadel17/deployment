@@ -4,10 +4,11 @@ import React, {useEffect, useMemo, useState} from 'react'
 import PriceWidget from '@/components/product/widgets/widget-price'
 import CategoryWidget from '@/components/product/widgets/widget-category'
 import VariableWidget from '@/components/product/widgets/widget-variable'
-import { products } from '@/data/products'
 import ProductCard from '../ProductCard'
 import ProductPagination from '../ProductPagination'
-import { get } from "@/lib/fetcher";
+import { Product } from '@/types/product';
+import getRequest from '@/lib/getter'
+import { useLocale } from 'next-intl';
 
 type Props = {
   // Optional: render your own products grid inside
@@ -15,17 +16,51 @@ type Props = {
 }
 
 export default function ProductStyle1({children}: Props) {
-  const getProducts = async () => {
-    const productsData = await get<any>("/catalog/products", { next: { revalidate: 60 } }).catch(() => null);
-   setProducts(productsData.data.items)
-  }
-  useEffect(() => {
-    getProducts();
-  }, [])
- const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState('default')
   const [perPage, setPerPage] = useState('9') // maps to columns
   const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState({
+    total: 0,
+    count: 0,
+    per_page: 10,
+    current_page: 1,
+    total_pages: 1
+  })
+  
+  // Get current locale from next-intl
+  const locale = useLocale();
+  console.log('Current locale in ProductStyle1:', locale);
+
+  const getProducts = async (page: number = currentPage) => {
+    setIsLoading(true);
+    try {
+      const productsData = await getRequest(`/catalog/products?page=${page}`, {
+        'Accept-Language': locale,
+      });
+      
+      if (productsData?.data) {
+        setProducts(productsData.data.items || []);
+        setPagination(productsData.data.paginate);
+        console.log('Products loaded successfully:', productsData.data.items.length, 'items');
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getProducts();
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    getProducts(page);
+  }
 
   const gridCols = useMemo(() => {
     if (perPage === '6') return 2
@@ -57,8 +92,15 @@ export default function ProductStyle1({children}: Props) {
 
               {/* Product Header */}
               <div className="flex items-end justify-between mb-6 space-x-4 rtl:space-x-reverse">
-                {/* Title */}
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Our Products</h2>
+                {/* Title and Count */}
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Our Products</h2>
+                  {!isLoading && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Showing {pagination.count} of {pagination.total} products
+                    </p>
+                  )}
+                </div>
 
                 <div className="flex items-center space-x-1 rtl:space-x-reverse">
                   {/* Order Select */}
@@ -85,27 +127,38 @@ export default function ProductStyle1({children}: Props) {
               </div>
 
               <div className="te-products">
-                <div
-                  id="products-grid"
-                  className={`grid gap-3 grid-cols-2 md:grid-cols-2 lg:grid-cols-${gridCols} ${gapClass}`}
-                >
-                  {products?.map((product) => (
-                <div
-                  key={product.id}
-                  className="embla__slide flex-shrink-0 py-1 [flex:0_0_calc(50%-0.75rem)] md:[flex:0_0_calc(33.333%-0.75rem)] lg:[flex:0_0_calc(25%-1.2rem)]"
-                >
-                  <ProductCard product={product} carousel={false} />
-                </div>
-              ))}
-                </div>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                      <p className="text-gray-600 dark:text-gray-400">Loading products...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    id="products-grid"
+                    className={`grid gap-3 grid-cols-2 md:grid-cols-2 lg:grid-cols-${gridCols} ${gapClass}`}
+                  >
+                    {products?.map((product) => (
+                      <div
+                        key={product.id}
+                        className="embla__slide flex-shrink-0 py-1 [flex:0_0_calc(50%-0.75rem)] md:[flex:0_0_calc(33.333%-0.75rem)] lg:[flex:0_0_calc(25%-1.2rem)]"
+                      >
+                        <ProductCard product={product} carousel={false} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Pagination */}
-              <ProductPagination 
-                currentPage={currentPage} 
-                totalPages={1} 
-                onPageChange={(page) => setCurrentPage(Math.max(1, page))} 
-              />
+              {!isLoading && pagination.total_pages > 1 && (
+                <ProductPagination 
+                  currentPage={pagination.current_page} 
+                  totalPages={pagination.total_pages} 
+                  onPageChange={handlePageChange} 
+                />
+              )}
               <div />
 
             </div>

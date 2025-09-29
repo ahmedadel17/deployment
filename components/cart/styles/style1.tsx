@@ -7,9 +7,11 @@ import { useTranslations } from 'next-intl'
 
 export default function CartStyle1() {
   const { cartItems, setCartItems } = useCart();
+  
   const removeItem = (index: number) => {
     setCartItems(cartItems.filter((_, i) => i !== index));
   }
+  
   const updateQuantity = (index: number, quantity: number) => {
     setCartItems(cartItems.map((item, i) => i === index ? { ...item, quantity } : item));
   }
@@ -34,7 +36,7 @@ export default function CartStyle1() {
             <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="md:w-32 md:h-32 w-full h-48">
-                  <Image width={100} height={100} src={item.thumbnail as string} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
+                  <Image width={100} height={100} src={item.image as string} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
                 </div>
 
                 <div className="flex-1">
@@ -48,17 +50,18 @@ export default function CartStyle1() {
                   </div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    {item.variations && <span>{String(item.variations)}</span>}
                     {item.color && <span>Color: {String(item.color)}</span>}
                     {item.size && <span>Size: {String(item.size)}</span>}
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Qty:{item.qty}</span>
                       <div className="flex items-center space-x-3 rtl:space-x-reverse">
                         <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
                           {/* <button onClick={() => updateQuantity(String(item.id), Math.max(1, item.quantity - 1))} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Decrease">-</button> */}
-                          <input type="number" value={item.quantity} readOnly className="w-16 !rounded-none border-0 focus:outline-none" />
+                          <input type="number" value={item.qty} readOnly className="w-16 !rounded-none border-0 focus:outline-none" />
                           {/* <button onClick={() => updateQuantity(String(item.id), item.quantity + 1)} className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Increase">+</button> */}
                         </div>
                       </div>
@@ -68,7 +71,7 @@ export default function CartStyle1() {
                       <div className="flex items-center space-x-2">
                         <span className="text-lg font-semibold text-gray-900 dark:text-white">
                           <span className="icon-riyal-symbol"></span>
-                          {item.price_after_discount.toFixed(2)}
+                          {Number(item.price).toFixed(2)}
                         </span>
                       </div>
                     </div>

@@ -2,44 +2,72 @@
 
 import React, { useState } from 'react';
 import { Product, ProductVariation } from '@/types/product';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import axios from 'axios';
+import { Formik, Form, Field } from 'formik';
+import { useCart } from '@/context/CartContext';
+import postRequest from '@/lib/post';
 
 interface ProductVariationsProps {
   variations: ProductVariation[];
   onSelectionChange?: (selectedVariations: SelectedVariations) => void;
   onVariationChange?: (selectedVariations: SelectedVariations) => void;
   product: Product;
+  onProductWithVariationsChange?: (product: Product | null) => void;
 }
 
 interface SelectedVariations {
   [attributeId: string]: string;
 }
 
-export default function ProductVariations({ variations, onSelectionChange, onVariationChange, product }: ProductVariationsProps) {
+export default function ProductVariations({ variations, onSelectionChange, onVariationChange, product, onProductWithVariationsChange }: ProductVariationsProps) {
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariations>({});
   const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingVariations, setIsUpdatingVariations] = useState(false);
+  const [hasLoadedVariations, setHasLoadedVariations] = useState(false);
+  const { cartItems, setCartItems } = useCart();
+  const locale = useLocale();
   const t = useTranslations();
   const handleVariationSelect = async (attributeId: string, value: string) => {
-    const newSelection = {
-      ...selectedVariations,
-      [attributeId]: value
-    };
+    // Toggle selection: if the same value is clicked, unselect it
+    const isSameValueClicked = selectedVariations[attributeId] === value;
+    const newSelection: SelectedVariations = { ...selectedVariations };
+    if (isSameValueClicked) {
+      delete newSelection[attributeId];
+    } else {
+      newSelection[attributeId] = value;
+    }
+
     setSelectedVariations(newSelection);
     onSelectionChange?.(newSelection);
-    onVariationChange?.(newSelection); // Call the new callback for ProductGallery
+    onVariationChange?.(newSelection);
+
+    // Check if all variations are selected
+    const allVariationsSelected = variations.every(v => Object.prototype.hasOwnProperty.call(newSelection, v.attribute_id));
     
-    // Call API when variations change
-    setIsUpdatingVariations(true);
-    try {
-      const variationData = await getProductByVariations(newSelection);
-      console.log('Variation data updated:', variationData);
-    } catch (error) {
-      console.error('Failed to update product variations:', error);
-    } finally {
-      setIsUpdatingVariations(false);
+    if (allVariationsSelected) {
+      // Check if the selection has actually changed (not just the same selection)
+      const selectionChanged = JSON.stringify(selectedVariations) !== JSON.stringify(newSelection);
+      
+      if (!hasLoadedVariations || selectionChanged) {
+        setIsUpdatingVariations(true);
+        try {
+          const variationData = await getProductByVariations(newSelection);
+          console.log('Variation data loaded:', variationData);
+          setHasLoadedVariations(true);
+          onProductWithVariationsChange?.(variationData);
+        } catch (error) {
+          console.error('Failed to load product variations:', error);
+        } finally {
+          setIsUpdatingVariations(false);
+        }
+      }
+    } else {
+      // Not all selected, clear any previously loaded variation-specific product and reset flag
+      setProductWithVariations(null);
+      setHasLoadedVariations(false);
+      onProductWithVariationsChange?.(null);
     }
   };
 
@@ -61,11 +89,9 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
       };
       
 
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL + `/catalog/products/get-variation-by-attribute`, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      const response = await
+       postRequest('/catalog/products/get-variation-by-attribute', requestBody, { 'Content-Type': 'application/json' },null,locale);
+     console.log(response);
       setProductWithVariations(response.data.data);
       return response.data.data;
     } catch (error) {
@@ -74,22 +100,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
     }
   }
 
-  const handleAddToCart = async () => {
-    if (isAllVariationsSelected()) {
-      setIsLoading(true);
-      try {
-        onSelectionChange?.(selectedVariations);
-        console.log('Adding to cart with variations:', selectedVariations);
-        console.log('Product with variations:', productWithVariations);
-        // TODO: Implement actual add to cart logic with productWithVariations
-      } catch (error) {
-        console.error('Failed to add to cart:', error);
-        // TODO: Show error message to user
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  // Form submission will handle add to cart using form values
 
   return (
     <>
@@ -122,7 +133,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                         </div>
                         <span className="text-sm text-gray-600 dark:text-gray-400 ml-2 rtl:ml-0 rtl:mr-2">4.2 (89 {t("reviews")})</span>
                     </div>
-                    <span className="product-stock text-sm text-green-600 dark:text-green-400">{t("In Stock")}</span>
+                    {productWithVariations?.stock && <span className="product-stock text-sm text-green-600 dark:text-green-400">{t("In Stock")}</span>}
                 </div>
             </div>
 
@@ -162,32 +173,71 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
 
             <hr className="border-gray-300 dark:border-gray-800"/>
 
-            {/* <!-- Quantity --> */}
-            <div className="product-quantity">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t("Quantity")}</h3>
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                    <div className="flex items-center rtl:flex-row-reverse border border-gray-300 dark:border-gray-600 rounded-md">
-                        {/* <!-- Decrease Button --> */}
-                        <button id="decreaseQty" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4"></path>
-                            </svg>
-                        </button>
+            <Formik
+              initialValues={{ qty: 1, customer_note: '' }}
+              onSubmit={async (values) => {
+                if (!isAllVariationsSelected()) return;
+                setIsLoading(true);
+                try {
+                  onSelectionChange?.(selectedVariations);
+                  
+                  const token = JSON.parse(localStorage.getItem('token') || 'null');
+                  const requestBody = {
+                    item_id: (productWithVariations?.id ?? product.id).toString(),
+                    qty: values.qty,
+                    customer_note: values.customer_note || '',
+                    attributes: selectedVariations,
+                    type: 'product'
+                  };
+                  const response = await
+                    postRequest('/marketplace/cart/add-to-cart', requestBody, { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
+                 
+                  
+                  // Add products from response to cart context
+                  if (response.data.data.products && Array.isArray(response.data.data.products)) {
+                    setCartItems(prevItems => {
+                      const newItems = [...prevItems, ...response.data.data.products];
+                      console.log('Updated cart state:', newItems);
+                      // Update localStorage immediately
+                      localStorage.setItem('cart', JSON.stringify(newItems));
+                      console.log('Updated localStorage cart:', JSON.parse(localStorage.getItem('cart') || '[]'));
+                      return newItems;
+                    });
+                  }
+                } catch (error) {
+                  console.error('Failed to add to cart:', error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {({ setFieldValue, values }) => (
+                <Form>
+                  {/* Quantity */}
+                  <div className="product-quantity">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t("Quantity")}</h3>
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                          <div className="flex items-center rtl:flex-row-reverse border border-gray-300 dark:border-gray-600 rounded-md">
+                              {/* Decrease Button */}
+                              <button type="button" id="decreaseQty" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.max(1, Number(values.qty) - 1))}>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4"></path>
+                                  </svg>
+                              </button>
 
-                        {/* <!-- Quantity Input --> */}
-                        {/* <input id="quantity" type="number" value="1" min="1" max="10"
-                            className="w-16 !rounded-none border-0 focus:outline-none"/> */}
+                              {/* Quantity Input */}
+                              <Field name="qty" type="number" min="1" max="10" className="w-16 !rounded-none border-0 focus:outline-none text-center" />
 
-                        {/* <!-- Increase Button --> */}
-                        <button id="increaseQty" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                        </button>
-                    </div>
-                   {productWithVariations && <span className="text-sm text-gray-600 dark:text-gray-400">{t("Only")}  {productWithVariations?.stock} {t("left in stock")}</span>}
-                </div>
-            </div>
+                              {/* Increase Button */}
+                              <button type="button" id="increaseQty" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.min(10, Number(values.qty) + 1))}>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                  </svg>
+                              </button>
+                          </div>
+                         {productWithVariations && <span className="text-sm text-gray-600 dark:text-gray-400">{t("Only")}  {productWithVariations?.stock} {t("left in stock")}</span>}
+                      </div>
+                  </div>
     <div className="space-y-6">
       {variations.map((variation) => (
         <div className="product-variation" key={variation.attribute_id}>
@@ -232,14 +282,15 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
     </div>
     
     <div className="space-y-2">
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-900 dark:text-white">Do you have another comment?</label>
-                <textarea id="comment" name="comment" rows={3} className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter your comment here..."></textarea>
+                <label htmlFor="customer_note" className="block text-sm font-medium text-gray-900 dark:text-white">Do you have another comment?</label>
+                <Field as="textarea" id="customer_note" name="customer_note" rows={3} className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter your comment here..."></Field>
             </div>
 {/* 
               <!-- Action Buttons --> */}
             <div className="product-actions space-y-3">
 
                 <button 
+                    type="submit"
                     id="addToCart" 
                     className={`w-full py-1 product-add-to-cart flex-1 te-btn te-btn-primary flex gap-2 items-center justify-center ${
                         !isAllVariationsSelected() || isLoading
@@ -247,7 +298,6 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                             : 'hover:bg-primary-700'
                     }`}
                     disabled={!isAllVariationsSelected() || isLoading}
-                    onClick={handleAddToCart}
                 >
                     {/* <!-- Cart Icon or Loading Spinner --> */}
                     {isLoading ? (
@@ -305,11 +355,14 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                 </button>
 
             </div>
+                </Form>
+              )}
+            </Formik>
 
             {/* <!-- Product Meta --> */}
             <div className="product-meta text-sm text-gray-600 dark:text-gray-400 space-y-2">
-               {productWithVariations && <p><span className="font-medium text-gray-900 dark:text-white">SKU:</span> {productWithVariations?.id}</p>}
-                <p>
+               {productWithVariations && <p><span className="font-medium text-gray-900 dark:text-white">SKU:</span> {productWithVariations?.sku}</p>}
+                {/* <p>
                     <span className="font-medium text-gray-900 dark:text-white">Category:</span>
                     <a href="/category/clothing" className="text-primary-600 dark:text-primary-200 hover:underline">Clothing</a>
                 </p>
@@ -319,7 +372,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                     <a href="/tag/chino" className="text-primary-600 dark:text-primary-200 hover:underline">Chino</a>,
                     <a href="/tag/casual" className="text-primary-600 dark:text-primary-200 hover:underline">Casual</a>,
                     <a href="/tag/men" className="text-primary-600 dark:text-primary-200 hover:underline">Men</a>
-                </p>
+                </p> */}
             </div>
     </>
   );

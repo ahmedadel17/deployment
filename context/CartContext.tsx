@@ -16,13 +16,23 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        setCartItems(parsedCart);
+        console.log('Cart loaded from localStorage:', parsedCart);
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+        setCartItems([]);
+      }
+    } else {
+      setCartItems([]);
     }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
+    console.log('Cart saved to localStorage:', cartItems);
   }, [cartItems]);
 
   return (

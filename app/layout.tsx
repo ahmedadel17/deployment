@@ -56,17 +56,19 @@ export default async function RootLayout({children}: Props) {
           }}
         />
       </head>
-      <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable}`} >
+      <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable} min-h-screen flex flex-col`} >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
             <ThemeInitializer />
         
-
             <Marquee/>
             <HeaderTopBar/>
             <HeaderStyle1 />
         
-            {children}
+            <main className="flex-1">
+              {children}
+            </main>
+            
             <FooterStyle1 />
           
           </CartProvider>

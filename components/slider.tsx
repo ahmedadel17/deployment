@@ -125,7 +125,7 @@ const t = useTranslations()
                             {slide.description}
                           </p>
                           <a href="#" className="te-btn te-btn-primary animated">
-                            {'Shop Collection'}
+                            {slide.button_text?slide.button_text:'Shop Collection'}
                           </a>
                         </div>
                       </div>

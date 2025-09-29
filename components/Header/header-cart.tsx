@@ -25,6 +25,7 @@ const HeaderCart: React.FC = () => {
     setIsOpen(!isOpen);
   };
   const t = useTranslations()
+  const totalPrice = cartItems.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
 
 
   return (
@@ -87,7 +88,7 @@ const HeaderCart: React.FC = () => {
             <span>Total:</span>
             <span>
               <span className="icon-riyal-symbol mr-1" />
-              {/* {totalPrice.toFixed(2)} */}
+              {totalPrice.toFixed(2)}
             </span>
           </div>
 
