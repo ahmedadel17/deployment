@@ -2,7 +2,9 @@ import axios from "axios";
 
 const getRequest = async (
   endpoint: string,
-  headers:any
+  headers:any,
+  locale:string,
+  token?:string | null
 ) => {
   try {
     const response = await axios.get(
@@ -10,7 +12,10 @@ const getRequest = async (
       {
         headers: {
           "Content-Type": "application/json",
-          ...headers, // merge custom headers
+          'Accept-Language': locale || 'en',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...headers,
+           // merge custom headers
         },
       }
     );

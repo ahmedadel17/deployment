@@ -14,7 +14,7 @@ export default function DropDownCartItem({items}: Props) {
   }
   return (
     <>
-      {items.map((item, index) => (
+      {items?.products?.map((item, index) => (
         <div key={index} className="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex-shrink-0">
             {item.image && (

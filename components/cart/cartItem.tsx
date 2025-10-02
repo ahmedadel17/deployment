@@ -1,6 +1,5 @@
 import Image from 'next/image'
 function CartItem({item, idx}: {item: any, idx: number}) {
-  console.log('item', item);
   return (
     <div>
         

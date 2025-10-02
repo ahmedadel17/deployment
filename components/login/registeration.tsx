@@ -1,16 +1,17 @@
 "use client"
-// import { useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Formik, FormikHelpers } from 'formik';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
-// import { useRouter } from 'next/navigation';
+import {getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji} from "country-codes-flags-phone-codes";
+import CountryPhoneInput from '@/components/phone/CountryPhoneInput';
 function Registeration() {
   
     interface RegisterFormValues {
         phone: string;
+        countryCode: string;
         first_name: string;
         last_name: string;
         email: string;
@@ -18,6 +19,23 @@ function Registeration() {
       }
       const router = useRouter();
       const phone=useSearchParams().get('phone');
+      const countryCode=useSearchParams().get('country');
+      
+      // Memoized onChange function for CountryPhoneInput
+      const handlePhoneChange = useCallback((phoneValue: string, countryCode: string, handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void) => {
+        handleChange({
+          target: {
+            name: 'phone',
+            value: phoneValue
+          }
+        } as React.ChangeEvent<HTMLInputElement>);
+        handleChange({
+          target: {
+            name: 'countryCode',
+            value: countryCode
+          }
+        } as React.ChangeEvent<HTMLInputElement>);
+      }, []);
       
   return (
     <div>
@@ -31,6 +49,7 @@ function Registeration() {
             <Formik<RegisterFormValues>
       initialValues={{ 
         phone: phone || '', 
+        countryCode: countryCode || 'SA',
         first_name: '', 
         last_name: '', 
         email: '', 
@@ -51,8 +70,15 @@ function Registeration() {
         }
         if (!values.phone) {
           errors.phone = 'Phone number is required';
-        } else if (!/^5[0-9]{8}$/.test(values.phone)) {
-          errors.phone = 'Phone number must start with 5 and be 9 digits';
+        } else {
+          // Check if phone contains only digits
+          if (!/^\d+$/.test(values.phone)) {
+            errors.phone = 'Phone number must contain only digits';
+          } else if (values.phone.length < 7) {
+            errors.phone = 'Phone number must be at least 7 digits';
+          } else if (values.phone.length > 11) {
+            errors.phone = 'Phone number must not exceed 11 digits';
+          }
         }
         if (!values.terms) {
           errors.terms = 'You must agree to the terms';
@@ -61,13 +87,15 @@ function Registeration() {
       }}
       onSubmit={async (values: RegisterFormValues, { setSubmitting, setFieldError }: FormikHelpers<RegisterFormValues>) => {
         try {
+            // Get country dial code
+            const phoneCode = getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji(values.countryCode) || '';
             
             // Prepare the data for the API
             const registrationData = {
               first_name: values.first_name,
               last_name: values.last_name,
               email: values.email,
-              phone: `+966${values.phone}`,
+              phone: `${phoneCode}${values.phone}`,
               terms_accepted: values.terms,
             };
             
@@ -75,9 +103,13 @@ function Registeration() {
             // const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL + "/auth/register", registrationData);
             // console.log('Registration response:', response.data);
             
-            // For now, just log the data and show success
-            localStorage.setItem('registrationData', JSON.stringify(registrationData));
-            router.push("/auth2/otp");
+            // Save complete registration data to localStorage
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('registrationData', JSON.stringify(registrationData));
+            }
+            
+            // Redirect to OTP page - the OTP page will read the complete data from localStorage
+            router.push(`/auth2/otp?phone=${values.phone}&country=${values.countryCode}`);
           } catch (error) {
             if (axios.isAxiosError(error)) {
               console.error("Axios error:", error.response?.data || error.message);
@@ -166,43 +198,17 @@ function Registeration() {
                 {errors.email && touched.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
         </div>
 
-        <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Phone Number {phone && <span className="text-green-600 text-xs">(Pre-filled from login)</span>}
-            </label>
-            <div className="mt-1 relative">
-                <div className="absolute inset-y-0 start-00 ps-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">+966</span>
-                </div>
-                <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    maxLength={9}
-                    disabled={isSubmitting}
-                    className={`block w-full ps-12 pr-3 py-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 ${
-                      errors.phone && touched.phone 
-                        ? 'border-red-500 dark:border-red-500' 
-                        : 'border-gray-300 dark:border-gray-600'
-                    } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    placeholder="5XXXXXXXX"
-                    pattern="5[0-9]{8}"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      // Only allow digits and limit to 9 characters
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 9);
-                      handleChange({
-                        target: {
-                          name: 'phone',
-                          value: value
-                        }
-                      } as React.ChangeEvent<HTMLInputElement>);
-                    }}
-                    onBlur={handleBlur}
-                    value={values.phone}
-                    />
-            </div>
-            {errors.phone && touched.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
-        </div>
+        <CountryPhoneInput
+          value={values.phone}
+          onChange={(phoneValue, countryCode) => handlePhoneChange(phoneValue, countryCode, handleChange)}
+          onBlur={handleBlur}
+          error={errors.phone}
+          touched={touched.phone}
+          disabled={isSubmitting}
+          label={`Phone Number ${phone ? '(Pre-filled from login)' : ''}`}
+          required
+          initialCountryCode={countryCode || 'SA'}
+        />
 
         <div className="flex items-start">
             <div className="flex items-center h-5">

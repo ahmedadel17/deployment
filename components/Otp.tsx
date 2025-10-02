@@ -10,24 +10,35 @@ export default function Otp2() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone');
   useEffect(()=>{
-    const registrationData = localStorage.getItem('registrationData');
-    setRegistrationData(registrationData);
+    // Check if we're on the client side
+    if (typeof window !== 'undefined') {
+      const registrationData = localStorage.getItem('registrationData');
+      console.log('OTP component loaded registration data from localStorage:', registrationData);
+      setRegistrationData(registrationData);
+    }
   },[]);
   
 const handleSubmit=async()=>{
   setIsSubmitting(true);
   try {
-    if(!phone){
-      const newRegistrationData={...JSON.parse(registrationData || '{}'), otp_code:String(otp.join(''))};
+    // Always use registration data from localStorage if available (complete registration flow)
+    if(registrationData){
+      const newRegistrationData={...JSON.parse(registrationData), otp_code:String(otp.join(''))};
+      console.log('Sending complete registration data:', newRegistrationData);
       const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
-      localStorage.setItem('token', JSON.stringify(response.data.data.token));
-      localStorage.removeItem('registrationData');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', JSON.stringify(response.data.data.token));
+        localStorage.removeItem('registrationData');
+      }
       router.push("/");
     }else{
+      // Fallback: if no registration data, use phone from URL (login flow)
       const newRegistrationData={phone:phone, otp_code:String(otp.join(''))};
+      console.log('Sending login data:', newRegistrationData);
       const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
-      localStorage.setItem('token', JSON.stringify(response.data.data.token));
-      localStorage.removeItem('registrationData');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', JSON.stringify(response.data.data.token));
+      }
       router.push("/");
     }
   } catch (error) {

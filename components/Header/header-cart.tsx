@@ -25,7 +25,7 @@ const HeaderCart: React.FC = () => {
     setIsOpen(!isOpen);
   };
   const t = useTranslations()
-  const totalPrice = cartItems.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
+  const totalPrice = cartItems?.amount_to_pay
 
 
   return (
@@ -57,7 +57,7 @@ const HeaderCart: React.FC = () => {
 
             {/* Badge */}
             <span className="header-cart-item absolute -top-1 -right-1 bg-primary-200 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none">
-              {cartItems.length}
+              {cartItems?.products?.length}
             </span>
           </div>
         </div>
@@ -68,7 +68,7 @@ const HeaderCart: React.FC = () => {
             {t("My Cart")}
           </span>
           <span className="text-gray-900 dark:text-gray-100 text-sm font-medium">
-            {/* {totalItems} */}
+            {cartItems?.amount_to_pay}
           </span>
         </div>
       </div>
@@ -88,7 +88,7 @@ const HeaderCart: React.FC = () => {
             <span>Total:</span>
             <span>
               <span className="icon-riyal-symbol mr-1" />
-              {totalPrice.toFixed(2)}
+              {totalPrice}
             </span>
           </div>
 

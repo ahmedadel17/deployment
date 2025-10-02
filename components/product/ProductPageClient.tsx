@@ -6,9 +6,9 @@ import ProductVariations from './ProductVariations';
 import { Product, ProductVariation } from '@/types/product';
 import { useTranslations } from 'next-intl';
 import { Formik, Form, Field } from 'formik';
-import axios from 'axios';
 import { useCart } from '@/context/CartContext';
 import postRequest from '@/lib/post';
+import QuantityInput from '@/components/QuantityInput';
 
 interface ProductPageClientProps {
   product: Product;
@@ -76,12 +76,11 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
                   // Add products from response to cart context
                   if (response.data.data.products && Array.isArray(response.data.data.products)) {
                     setCartItems(prevItems => {
-                      const newItems = [...prevItems, ...response.data.data.products];
-                      console.log('Updated cart state:', newItems);
+                    
                       // Update localStorage immediately
-                      localStorage.setItem('cart', JSON.stringify(newItems));
+                      localStorage.setItem('cart', JSON.stringify(response.data.data));
                       console.log('Updated localStorage cart:', JSON.parse(localStorage.getItem('cart') || '[]'));
-                      return newItems;
+                      return response.data.data;
                     });
                   }
                 } catch (error) {
@@ -150,32 +149,15 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
               {/* Quantity */}
               <div className="product-quantity">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t("Quantity")}</h3>
-                <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                  <div className="flex items-center rtl:flex-row-reverse border border-gray-300 dark:border-gray-600 rounded-md">
-                    {/* Decrease Button */}
-                    <button type="button" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.max(1, Number(values.qty) - 1))}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4"></path>
-                      </svg>
-                    </button>
-
-                    {/* Quantity Input */}
-                    <Field name="qty" type="number" min="1" max="10"
-                      className="w-16 !rounded-none border-0 focus:outline-none text-center" />
-
-                    {/* Increase Button */}
-                    <button type="button" className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" onClick={() => setFieldValue('qty', Math.min(10, Number(values.qty) + 1))}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                      </svg>
-                    </button>
-                  </div>
-                  {product.stock && (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("Only")} {product.stock} {t("left in stock")}
-                    </span>
-                  )}
-                </div>
+                <QuantityInput
+                  value={Number(values.qty)}
+                  onChange={(newValue) => setFieldValue('qty', newValue)}
+                  min={1}
+                  max={10}
+                  showStockInfo={!!product.stock}
+                  stock={product.stock}
+                  stockLabel={t("Only")}
+                />
               </div>
 
               {/* Comment Section */}

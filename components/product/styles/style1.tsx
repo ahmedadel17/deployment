@@ -9,6 +9,7 @@ import ProductPagination from '../ProductPagination'
 import { Product } from '@/types/product';
 import getRequest from '@/lib/getter'
 import { useLocale } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   // Optional: render your own products grid inside
@@ -31,19 +32,26 @@ export default function ProductStyle1({children}: Props) {
   
   // Get current locale from next-intl
   const locale = useLocale();
-  console.log('Current locale in ProductStyle1:', locale);
+  
+  // Get search parameters from URL
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search');
 
   const getProducts = async (page: number = currentPage) => {
     setIsLoading(true);
     try {
-      const productsData = await getRequest(`/catalog/products?page=${page}`, {
-        'Accept-Language': locale,
-      });
+      // Build query parameters
+      let queryParams = `page=${page}`;
+      if (searchQuery) {
+        queryParams += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const token = JSON.parse(localStorage.getItem('token') || 'null');
+      const productsData = await getRequest(`/catalog/products?${queryParams}`,{},locale,token,);
       
       if (productsData?.data) {
         setProducts(productsData.data.items || []);
         setPagination(productsData.data.paginate);
-        console.log('Products loaded successfully:', productsData.data.items.length, 'items');
+        console.log('Products loaded successfully:', productsData.data.items.length, 'items', searchQuery ? `for search: "${searchQuery}"` : '');
       }
     } catch (error) {
       console.error('Failed to fetch products:', error);
@@ -54,8 +62,9 @@ export default function ProductStyle1({children}: Props) {
   }
 
   useEffect(() => {
-    getProducts();
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    setCurrentPage(1); // Reset to first page when search changes
+    getProducts(1);
+  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -94,10 +103,12 @@ export default function ProductStyle1({children}: Props) {
               <div className="flex items-end justify-between mb-6 space-x-4 rtl:space-x-reverse">
                 {/* Title and Count */}
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Our Products</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {searchQuery ? `Search Results for "${searchQuery}"` : 'Our Products'}
+                  </h2>
                   {!isLoading && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Showing {pagination.count} of {pagination.total} products
+                      {searchQuery ? `Found ${pagination.total} products` : `Showing ${pagination.count} of ${pagination.total} products`}
                     </p>
                   )}
                 </div>
