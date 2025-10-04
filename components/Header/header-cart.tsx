@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {useTranslations} from 'next-intl';
 import DropDownCartItem from "../cart/dropDownCartItem";
 import { useCart } from "@/context/CartContext";
+import EmptyCart from "../cart/emptyCart";
 const HeaderCart: React.FC = () => {
   const { cartItems, setCartItems } = useCart();
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +58,7 @@ const HeaderCart: React.FC = () => {
 
             {/* Badge */}
             <span className="header-cart-item absolute -top-1 -right-1 bg-primary-200 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none">
-              {cartItems?.products?.length}
+              {cartItems?.products ? cartItems?.products?.length : 0}
             </span>
           </div>
         </div>
@@ -68,13 +69,14 @@ const HeaderCart: React.FC = () => {
             {t("My Cart")}
           </span>
           <span className="text-gray-900 dark:text-gray-100 text-sm font-medium">
-            {cartItems?.amount_to_pay}
+            {cartItems?.amount_to_pay ? cartItems?.amount_to_pay : 0}
           </span>
         </div>
       </div>
 
       {/* Dropdown Content */}
-      <div className={`cart-drop-down te-navbar-dropdown-content px-4 py-4 bg-white dark:bg-gray-800 max-w-[200px] ${isOpen ? 'te-dropdown-show' : ''}`}>
+    { 
+     <div className={`cart-drop-down te-navbar-dropdown-content px-4 py-4 bg-white dark:bg-gray-800 max-w-[200px] ${isOpen ? 'te-dropdown-show' : ''}`}>
         <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">
           {t("Shopping Cart")}
         </div>
@@ -83,6 +85,10 @@ const HeaderCart: React.FC = () => {
          <DropDownCartItem  items={cartItems} />
 
         {/* Cart Total */}
+        {
+          cartItems?.products?.length == 0 || !cartItems?.products ? (
+            <EmptyCart />
+          ) : (
         <div className="mt-6">
           <div className="flex justify-between items-center font-medium mb-3 text-gray-900 dark:text-white">
             <span>Total:</span>
@@ -104,7 +110,9 @@ const HeaderCart: React.FC = () => {
             </a>
           </div>
         </div>
-      </div>
+        )
+      }
+      </div>}
     </div>
   );
 };

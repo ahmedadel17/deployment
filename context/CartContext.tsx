@@ -1,16 +1,16 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { CartItem } from "@/types/cart";
+import { CartData } from "@/types/cart";
 type CartContextType = {
-  cartItems: CartItem[];
-  setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  cartItems: CartData | null;
+  setCartItems: React.Dispatch<React.SetStateAction<CartData | null>>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartData | null>(null);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -24,10 +24,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           console.log('Cart loaded from localStorage:', parsedCart);
         } catch (error) {
           console.error('Error parsing cart from localStorage:', error);
-          setCartItems([]);
+          setCartItems(null);
         }
       } else {
-        setCartItems([]);
+        setCartItems(null);
       }
     }
   }, []);

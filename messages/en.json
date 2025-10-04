@@ -107,6 +107,13 @@
       "Specifications":"Specifications",
       "reviews":"reviews",
       "Size":"size",
-      "Color":"Color"
-
+      "Color":"Color",
+      "Promo code applied successfully!":"Promo code applied successfully!",
+      "Promo code":"Promo code",
+      "Invalid promo code":"Invalid promo code",
+      "Use Wallet Balance":"Use Wallet Balance",
+      "Apply your wallet balance to this order":"Apply your wallet balance to this order",
+      "Your cart is empty":"Your cart is empty",
+      "Add some items to get started":"Add some items to get started",
+      "applying":"applying"
   }

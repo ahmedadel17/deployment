@@ -9,4 +9,20 @@ export interface CartItem extends Omit<Product, 'price_after_discount' | 'thumbn
   size?: string;
 }
 
+export interface CartData {
+  id: string;
+  products: CartItem[];
+  order_attributes?: Array<{
+    label: string;
+    value: string | number;
+    color?: string;
+    show_currency?: boolean;
+  }>;
+  amount_to_pay?: string | number;
+  voucher?: {
+    code: string;
+    message: string;
+  };
+}
+
 

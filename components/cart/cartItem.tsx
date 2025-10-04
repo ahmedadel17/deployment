@@ -1,63 +1,139 @@
+'use client'
 import Image from 'next/image'
+import DeleteButton from '../ui/DeleteButton'
+import { useCart } from '@/context/CartContext'
+import { deleteCartItem } from '@/lib/cartHelpers'
+import tokenGetter from '@/lib/tokenGetter'
+import { useLocale } from 'next-intl'
+import postRequest from '@/lib/post'
+import QuantityInput from '../QuantityInput'
+import { useState } from 'react'
 function CartItem({item, idx}: {item: any, idx: number}) {
+  const { cartItems, setCartItems } = useCart();
+  const token = tokenGetter();
+  const locale = useLocale();
+  const [isLoading, setIsLoading] = useState(false);
+  const deleteItem = async (item_id: string) => {
+    try {
+      
+      const response = await deleteCartItem({
+        orderId: (cartItems as { id?: string })?.id || '',
+        itemId: item_id,
+        token,
+        locale
+      });
+      
+      setCartItems(response.data);
+      localStorage.setItem('cart', JSON.stringify(response.products || []));
+    } catch (error) {
+      console.error('Failed to delete item:', error);
+    } 
+  }
+
+  const updateQuantity = (index: number, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    
+    // Only update local state for UI responsiveness
+    setCartItems(prevItems => {
+      if (!prevItems) return prevItems;
+      const updatedProducts = [...prevItems.products];
+      console.log(updatedProducts);
+      updatedProducts[index] = { ...updatedProducts[index], qty: newQuantity };
+      console.log(updatedProducts);
+      return { ...prevItems, products: updatedProducts };
+    });
+  };
+const updateCartItemQty = async (item_id: string, newQuantity: number) => {
+  try {
+    setIsLoading(true);
+    
+    const response = await postRequest('/marketplace/cart/update-quantity-cart', {
+      order_id: cartItems?.id,
+      cart_item_id: item_id,
+      qty: newQuantity,
+      type: 'product'
+    }, {}, token, locale);
+    
+    setCartItems(response.data.data);
+    console.log('cartItems', cartItems);
+  } catch (error) {
+    console.error('Failed to update item quantity:', error);
+  } finally {
+    setIsLoading(false);
+  }
+}
   return (
-    <div>
-        
-              <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="md:w-32 md:h-32 w-full h-48">
-                    <Image width={100} height={100} src={item.image} alt={item.title} className="w-full h-full object-cover rounded-md" />
-                  </div>
+    <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="md:w-32 md:h-32 w-full h-48">
+        <Image width={100} height={100} src={item.image as string} alt={String(item.name)} className="w-full h-full object-cover rounded-md" />
+      </div>
 
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                      <button className="text-gray-400 hover:text-red-500 transition-colors" aria-label="Remove item">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
+      <div className="flex-1">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-semibold text-gray-900 dark:text-white">
+            {String(item.name)}
+             <span className="text-xs text-gray-600 dark:text-gray-400">
+               {item?.variation && String(item.variation)}
+             </span>
+            </h3>
+         
+       
+        <DeleteButton
+          onDelete={() => deleteItem(String(item.id))}
+          size="md"
+          variant="icon"
+        />
+        </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      <span>Color: {item.color}</span>
-                      <span>Size: {item.size}</span>
-                    </div>
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {item.variations && <span>{String(item.variations)}</span>}
+          {item.color && <span>Color: {String(item.color)}</span>}
+          {item.size && <span>Size: {String(item.size)}</span>}
+        </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
-                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                          <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
-                            <button className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Decrease">-</button>
-                            <input type="number" value={item.qty} readOnly className="w-16 !rounded-none border-0 focus:outline-none" />
-                            <button className="px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Increase">+</button>
-                          </div>
-                        </div>
-                      </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
+            <QuantityInput
+              value={item.qty}
+              onChange={(newQuantity) => updateQuantity(idx, newQuantity)}
+              min={1}
+              max={99}
+              className="ml-2"
+            />
+             <button 
+               className={`px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md transition-colors ${
+                 isLoading 
+                   ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+                   : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'
+               }`}
+               onClick={() => updateCartItemQty(String(item.id), item.qty)}
+               disabled={isLoading}
+             >
+               {isLoading ? (
+                 <div className="flex items-center">
+                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
+                   <span>Updating...</span>
+                 </div>
+               ) : (
+                 'Update'
+               )}
+             </button>
+          </div>
 
-                      <div className="text-right">
-                        <div className="flex items-center space-x-2">
-                          {item.price_old && (
-                            <span className="text-gray-500 dark:text-gray-400 line-through text-sm">
-                              <span className="icon-riyal-symbol"></span>
-                              <span>{item.price_old}</span>
-                            </span>
-                          )}
-                          <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                            <span className="icon-riyal-symbol"></span>
-                            {item.price}
-                          </span>
-                        </div>
-                        {item.price_each && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{item.price_each} each</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="text-right">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                <span className="icon-riyal-symbol"></span>
+                {Number(item.price).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
   )
 }
 

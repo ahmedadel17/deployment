@@ -4,7 +4,7 @@ import ThemeInitializer from '@/components/ThemeInitializer'
 function Auth2Layout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" dir="ltr">
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col dark:bg-gray-900">
         <ThemeInitializer />
         
         {/* Main content area */}

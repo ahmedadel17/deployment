@@ -100,7 +100,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
     >
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-white dark:bg-gray-800">
-        <Link href={`/products/${product.id}`} className="product-thumbnail relative block overflow-hidden rounded-lg lg:rounded-t-lg lg:rounded-b-none group">
+        <div className="product-thumbnail relative block overflow-hidden rounded-lg lg:rounded-t-lg lg:rounded-b-none group">
           {/* Product Badges */}
           {product.badges && product.badges.length > 0 && (
             <div className="product-badges absolute top-2 start-2 z-10 flex flex-col gap-1">
@@ -167,7 +167,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
               className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out transform scale-105 opacity-0 group-hover:scale-100 group-hover:opacity-100"
             />
           )}
-        </Link>
+        </div>
       </div>
 
       {/* Product Info */}

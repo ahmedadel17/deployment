@@ -16,9 +16,7 @@ async function Page({ params }: PageProps) {
   const { id } = await params;
 
   const locale = await getLocale();
-  const productData= await getRequest(`/catalog/products/details/${id}`, {
-    'Accept-Language': locale,
-  },locale);
+  const productData= await getRequest(`/catalog/products/details/${id}`,{},locale);
   
   const product = productData.data;
  
