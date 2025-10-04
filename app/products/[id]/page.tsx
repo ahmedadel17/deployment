@@ -1,8 +1,6 @@
 import React from 'react'
-import { get } from '@/lib/fetcher'
 import ProductPageClient from '@/components/product/ProductPageClient'
 import ProductTabs from '@/components/product/ProductTabs'
-import { Product } from '@/types/product'
 import getRequest from '@/lib/getter'
 import { getLocale } from 'next-intl/server'
 

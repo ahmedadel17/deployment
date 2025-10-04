@@ -8,7 +8,7 @@ import "./globals.css";
 import HeaderTopBar from "@/components/Header/header-top-bar";
 import Marquee from "@/components/Header/marquee";
 import { CartProvider } from "@/context/CartContext";
-import ThemeInitializer from "@/components/ThemeInitializer";
+import { ThemeProvider } from "@/components/ThemeProvider";
 type Props = {
   children: React.ReactNode;
 };
@@ -31,47 +31,24 @@ export default async function RootLayout({children}: Props) {
   const messages = (await import(`../messages/${locale}.json`)).default;
 
   return (
-    <html lang={locale} dir={dir}>
-      <head>
-        {/* Theme initialization script to prevent FOUC */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const savedTheme = localStorage.getItem('theme');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  
-                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {
-                  // Fallback to light mode if localStorage is not available
-                  document.documentElement.classList.remove('dark');
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable} min-h-screen flex flex-col`} >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <CartProvider>
-            <ThemeInitializer />
+          <ThemeProvider>
+            <CartProvider>
         
             <Marquee/>
             <HeaderTopBar/>
             <HeaderStyle1 />
         
-            <main className="flex-1">
+            <main className="flex-1 dark:bg-gray-900 bg-gray-50">
               {children}
             </main>
             
             <FooterStyle1 />
           
-          </CartProvider>
+            </CartProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

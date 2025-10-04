@@ -23,6 +23,7 @@ export interface CartData {
     code: string;
     message: string;
   };
+  allowed_payment_methods?: string[];
 }
 
 

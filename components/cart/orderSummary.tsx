@@ -1,12 +1,15 @@
 'use client'
 import React, { useState } from 'react'
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { useCart } from '@/context/CartContext';
 import OrderAttribute from './orderAttribute';
 import WalletBallanceToggler from './walletBalanceToggler';
 import PromoCode from './promoCode';
 import { Check, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
+import tokenGetter from '@/lib/tokenGetter';
+import postRequest from '@/lib/post';
 // Validation schema for promo code
 
 
@@ -14,11 +17,18 @@ function OrderSummary() {
     const { cartItems } = useCart();
     const t = useTranslations();
     const [isOrderSummaryExpanded, setIsOrderSummaryExpanded] = useState(true);
-    
+    const token= tokenGetter();
+    const locale = useLocale();
+    const convertCartToOrder = async () => {
+      try {
+        const response = await postRequest('/order/orders/change-cart-to-order/'+cartItems?.id, {
+        }, {}, token, locale);
+      } catch (error) {
+        console.error('Failed to convert cart to order:', error);
+      }
+    }   
     // Get token safely (handles SSR)
-
-    // Handle promo code submission
-   
+    
  
   return (
     <div className="lg:col-span-1">
@@ -66,7 +76,8 @@ function OrderSummary() {
             </div>
           </div>
 
-          <a href="/checkout" className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</a>
+          <button onClick={convertCartToOrder} className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</button>
+          <Link href="/checkout" className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</Link>
           <a href="#" className="w-full py-3 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium mb-4 text-center block">{t('PayPal Express Checkout')}</a>
 
           <div className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">

@@ -3,12 +3,11 @@ import ThemeInitializer from '@/components/ThemeInitializer'
 
 function Auth2Layout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" dir="ltr">
-      <body className="min-h-screen flex flex-col dark:bg-gray-900">
+      <>
         <ThemeInitializer />
         
         {/* Main content area */}
-        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex-1 flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-lg w-full space-y-8">
             {/* Logo/Header */}
             <div className="text-center">
@@ -22,8 +21,7 @@ function Auth2Layout({children}: {children: React.ReactNode}) {
             {children}
           </div>
         </div>
-      </body>
-    </html>
+      </>
   )
 }
 

@@ -8,12 +8,15 @@ import getRequest from '@/lib/getter'
 import OrderSummary from '../orderSummary'
 import EmptyCart from '../emptyCart'
 import CartItem from '../cartItem'
+import tokenGetter from '@/lib/tokenGetter'
+import postRequest from '@/lib/post'
 
 
 export default function CartStyle1() {
   const { cartItems, setCartItems } = useCart();
   const t = useTranslations();
   const locale = useLocale();
+  const token = tokenGetter();
   const [isLoading, setIsLoading] = useState(true);
   // Load cart data from API
   useEffect(() => {
@@ -22,10 +25,10 @@ export default function CartStyle1() {
         setIsLoading(true);
         const token = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('token') || 'null') : null;
         
-        const response = await getRequest('/marketplace/cart/my-cart', {
+        const data = await getRequest('/marketplace/cart/my-cart', {
           'Accept-Language': locale,
         }, locale, token);
-        setCartItems(response.data);
+        setCartItems(data.data);
       } catch (error) {
         console.error('Failed to load cart data:', error);
       } finally {
@@ -35,6 +38,7 @@ export default function CartStyle1() {
 
     loadCartData();
   }, [locale, setCartItems]);
+  
 
 
 
@@ -63,8 +67,10 @@ export default function CartStyle1() {
                 <p className="text-gray-600 dark:text-gray-400">Loading cart...</p>
               </div>
             </div>
-          ): (
-            cartItems?.products?.map((item, idx: number) => (
+          ) : !cartItems?.products || cartItems.products.length === 0 ? (
+            <EmptyCart />
+          ) : (
+            cartItems.products.map((item, idx: number) => (
             <CartItem item={item} idx={idx} key={idx} />
             ))
           )}
