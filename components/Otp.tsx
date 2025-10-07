@@ -3,17 +3,18 @@ import React, { useEffect, useRef, useState } from "react";
 import {useRouter} from 'next/navigation';
 import axios from "axios";
 import { useSearchParams } from 'next/navigation';
+import { getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji } from "country-codes-flags-phone-codes";
 export default function Otp2() {
   const [otp, setOtp] = useState(Array(5).fill("")); // 6-digit OTP
   const [registrationData, setRegistrationData] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone');
+  const country:string|null=searchParams.get('country');
   useEffect(()=>{
     // Check if we're on the client side
     if (typeof window !== 'undefined') {
       const registrationData = localStorage.getItem('registrationData');
-      console.log('OTP component loaded registration data from localStorage:', registrationData);
       setRegistrationData(registrationData);
     }
   },[]);
@@ -32,8 +33,9 @@ const handleSubmit=async()=>{
       }
       router.push("/");
     }else{
+      const phoneCode = getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji(country || '')
       // Fallback: if no registration data, use phone from URL (login flow)
-      const newRegistrationData={phone:phone, otp_code:String(otp.join(''))};
+      const newRegistrationData={phone: `${phoneCode}${phone}`, otp_code:String(otp.join(''))};
       console.log('Sending login data:', newRegistrationData);
       const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
       if (typeof window !== 'undefined') {

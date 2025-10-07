@@ -16,6 +16,8 @@ import Price from './price';
 import Variations from './variations';
 import Description from './description';
 import ProductMeta from './productMeta';
+import toast from 'react-hot-toast';
+import toastHelper from '@/lib/toastHelper';
 
 interface ProductVariationsProps {
   variations: ProductVariation[];
@@ -55,8 +57,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
       };
       const response = await
         postRequest('/marketplace/cart/add-to-cart', requestBody, { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
-     
-      
+        toastHelper(response.data.status,response.data.message);
       // Add products from response to cart context
       if (response.data.data.products && Array.isArray(response.data.data.products)) {
         setCartItems(prevItems => {
@@ -71,6 +72,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
       setIsLoading(false);
     }
   };
+  
   const handleVariationSelect = async (attributeId: string, value: string) => {
     // Toggle selection: if the same value is clicked, unselect it
     const isSameValueClicked = selectedVariations[attributeId] === value;

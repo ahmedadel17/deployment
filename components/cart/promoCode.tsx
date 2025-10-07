@@ -7,6 +7,7 @@ import tokenGetter from '@/lib/tokenGetter';
 import postRequest from '@/lib/post';
 import { useCart } from '@/context/CartContext';
 import AppliedPromoCode from './appliedPromoCode';
+import toastHelper from '@/lib/toastHelper';
 function PromoCode() {
     const t = useTranslations();
     const token = tokenGetter();
@@ -31,6 +32,7 @@ function PromoCode() {
           // Get cart ID from the cart data structure
           const cartId = (cartItems as { id?: string })?.id || (Array.isArray(cartItems) ? cartItems[0]?.id : undefined);
           const response = await postRequest('/marketplace/cart/apply-voucher/'+cartId, { promo_code_id: values.promo_code_id }, {},token);
+          toastHelper(response.data.status,response.data.message);
           setCartItems(response.data.data);
           resetForm();
         } catch {
@@ -42,7 +44,7 @@ function PromoCode() {
       };
   return (
     <div>
-           <Formik
+          {!cartItems?.voucher?.code && <Formik
               initialValues={{ promo_code_id: '' }}
               validationSchema={promoCodeSchema}
               onSubmit={handlePromoCodeSubmit}
@@ -76,7 +78,7 @@ function PromoCode() {
                   )}
                 </Form>
               )}
-            </Formik>
+            </Formik>}
             {cartItems?.voucher?.code && (
          <AppliedPromoCode />
             )}

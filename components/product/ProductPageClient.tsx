@@ -17,6 +17,8 @@ import TextArea from '../ui/TextArea';
 import AddToCartButton from '../ui/AddToCartButton';
 import ActionButton from '../ui/ActionButton';
 import ProductMeta from './productMeta';
+import toast from 'react-hot-toast';
+import toastHelper from '@/lib/toastHelper';
 
 interface ProductPageClientProps {
   product: Product;
@@ -49,7 +51,7 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
       const token = JSON.parse(localStorage.getItem('token') || 'null');
       const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product.default_variation_id, type: 'product' }, 
         { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
-      
+     toastHelper(response.data.status,response.data.message);
       // Add products from response to cart context
       if (response.data.data.products && Array.isArray(response.data.data.products)) {
         setCartItems(prevItems => {

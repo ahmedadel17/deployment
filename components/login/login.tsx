@@ -52,7 +52,7 @@ function Login() {
             const phoneCode = country?.dialCode || '+966';
             const phoneData = { phone: `${phoneCode}${values.phone}` };
             
-            const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/check-exists-user", phoneData);
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/send-otp", phoneData);
             console.log('API response:', response.data);
             
             if(response.data.data.registered){

@@ -6,6 +6,7 @@ import DeleteButton from '@/components/ui/DeleteButton'
 import tokenGetter from '@/lib/tokenGetter'
 import { useLocale } from 'next-intl'
 import { deleteCartItem } from '@/lib/cartHelpers'
+import toastHelper from '@/lib/toastHelper'
 
 type Props = {
   items: CartItem[]
@@ -24,7 +25,8 @@ export default function DropDownCartItem({items}: Props) {
         token,
         locale
       });
-      
+
+      toastHelper(response.data.status,response.data.message,'Item deleted successfully','Item not deleted');
       setCartItems(response.data);
       localStorage.setItem('cart', JSON.stringify(response.products || []));
     } catch (error) {

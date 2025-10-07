@@ -1,12 +1,32 @@
-import Link from 'next/link'
 import React from 'react'
-import {useTranslations} from 'next-intl'
+import {useLocale, useTranslations} from 'next-intl'
 import { useCart } from '@/context/CartContext';
+import { useOrderState } from '@/context/OrderStateContext';
 import OrderAttribute from '../cart/orderAttribute';
 import Image from 'next/image';
+import tokenGetter from '@/lib/tokenGetter';
+import postRequest from '@/lib/post';
+import toastHelper from '@/lib/toastHelper';
 function OrderSummary() {
-  const { cartItems } = useCart();
+  const { cartItems, setCartItems } = useCart();
+  const { orderState, isOrderComplete, getOrderPayload } = useOrderState();
   const t = useTranslations();
+  const locale = useLocale();
+
+  const handlePlaceOrder = async() => {
+    // if (!isOrderComplete()) {
+    //   alert(t('Please complete all required fields before placing your order'));
+    //   return;
+    // }
+
+    const payload = getOrderPayload();
+    const response = await postRequest(`/marketplace/cart/cart-details/${cartItems?.id}`, payload, {}, tokenGetter(), locale);
+    setCartItems(response.data.data);
+    toastHelper(response.data.status,response.data.message);
+    
+    // Here you would typically make an API call to place the order
+    // For now, we'll just log the data
+  };
   return (
     <div className="lg:col-span-1">
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 sticky top-4">
@@ -14,7 +34,7 @@ function OrderSummary() {
 
       {/* Order Items */}
       <div className="space-y-4 mb-6">
-        {cartItems?.products.map((item: any, index: any) => (
+        {cartItems?.products.map((item: any, index: number) => (
           <div key={index} className="flex items-center space-x-4 rtl:space-x-reverse">
             <Image 
               src={item.image} 
@@ -42,13 +62,13 @@ function OrderSummary() {
       <div className="border-t border-gray-200 dark:border-gray-600 pt-4 space-y-2">
         <div className="flex justify-between">
           <span className="text-gray-600 dark:text-gray-400">{t('Subtotal')}</span>
-          <span className="text-gray-900 dark:text-white">
-            <span className="icon-riyal-symbol text-xs"></span>
-            <span>{cartItems?.sub_total}</span>
-          </span>
+            <span className="text-gray-900 dark:text-white">
+              <span className="icon-riyal-symbol text-xs"></span>
+              <span>{(cartItems as any)?.sub_total || '0'}</span>
+            </span>
         </div>
       {
-        cartItems?.order_attributes.map((item: any, index: any) => (
+        cartItems?.order_attributes?.map((item: any, index: number) => (
             <OrderAttribute key={index} {...item} />
         ))
       }
@@ -57,19 +77,30 @@ function OrderSummary() {
             <span className="text-lg font-semibold text-gray-900 dark:text-white">{t('Total')}</span>
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
               <span className="icon-riyal-symbol"></span>
-              <span>{cartItems?.total_amount}</span>
+              <span>{(cartItems as any)?.total_amount || '0'}</span>
             </span>
           </div>
         </div>
       </div>
 
+      {/* Order State Debug */}
+      <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-md text-xs">
+        <div className="font-semibold mb-2">Order State:</div>
+        <div>Address ID: {orderState.user_address_id || 'Not selected'}</div>
+        <div>Shipping: {orderState.shipping_slug || 'Not selected'}</div>
+        <div>Payment: {orderState.payment_method || 'Not selected'}</div>
+        <div className="mt-2 font-semibold">
+          Status: {isOrderComplete() ? '✅ Complete' : '❌ Incomplete'}
+        </div>
+      </div>
+
       {/* Place Order Button */}
-      <Link
-        href="/confirmation" 
-        className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center block"
+      <button
+        onClick={handlePlaceOrder}
+        className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {t('Place Order')}
-      </Link>
+      </button>
 
       {/* Security Notice */}
       <div className="mt-4 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">

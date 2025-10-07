@@ -1,0 +1,96 @@
+'use client'
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+// Types
+interface OrderState {
+  user_address_id: string;
+  shipping_slug: string;
+  payment_method: string;
+}
+
+interface OrderStateContextType {
+  orderState: OrderState;
+  updateUserAddressId: (addressId: string) => void;
+  updateShippingSlug: (shippingSlug: string) => void;
+  updatePaymentMethod: (paymentMethod: string) => void;
+  resetOrderState: () => void;
+  isOrderComplete: () => boolean;
+  getOrderPayload: () => OrderState;
+}
+
+const OrderStateContext = createContext<OrderStateContextType | undefined>(undefined);
+
+export const useOrderState = () => {
+  const context = useContext(OrderStateContext);
+  if (!context) {
+    throw new Error('useOrderState must be used within an OrderStateProvider');
+  }
+  return context;
+};
+
+interface OrderStateProviderProps {
+  children: ReactNode;
+}
+
+export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children }) => {
+  const [orderState, setOrderState] = useState<OrderState>({
+    user_address_id: '',
+    shipping_slug: '',
+    payment_method: '',
+  });
+
+  const updateUserAddressId = (addressId: string) => {
+    setOrderState(prev => ({
+      ...prev,
+      user_address_id: addressId,
+    }));
+  };
+
+  const updateShippingSlug = (shippingSlug: string) => {
+    setOrderState(prev => ({
+      ...prev,
+      shipping_slug: shippingSlug,
+    }));
+  };
+
+  const updatePaymentMethod = (paymentMethod: string) => {
+    setOrderState(prev => ({
+      ...prev,
+      payment_method: paymentMethod,
+    }));
+  };
+
+  const resetOrderState = () => {
+    setOrderState({
+      user_address_id: '',
+      shipping_slug: '',
+      payment_method: '',
+    });
+  };
+
+  const isOrderComplete = () => {
+    return orderState.user_address_id !== '' && 
+           orderState.shipping_slug !== '' && 
+           orderState.payment_method !== '';
+  };
+
+  const getOrderPayload = () => {
+    return orderState;
+  };
+
+  const value: OrderStateContextType = {
+    orderState,
+    updateUserAddressId,
+    updateShippingSlug,
+    updatePaymentMethod,
+    resetOrderState,
+    isOrderComplete,
+    getOrderPayload,
+  };
+
+  return (
+    <OrderStateContext.Provider value={value}>
+      {children}
+    </OrderStateContext.Provider>
+  );
+};

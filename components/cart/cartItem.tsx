@@ -8,6 +8,7 @@ import { useLocale } from 'next-intl'
 import postRequest from '@/lib/post'
 import QuantityInput from '../QuantityInput'
 import { useState } from 'react'
+import toastHelper from '@/lib/toastHelper'
 function CartItem({item, idx}: {item: any, idx: number}) {
   const { cartItems, setCartItems } = useCart();
   const token = tokenGetter();
@@ -22,7 +23,7 @@ function CartItem({item, idx}: {item: any, idx: number}) {
         token,
         locale
       });
-      
+      toastHelper(response.data.status,response.data.message,'Item deleted successfully','Item not deleted');
       setCartItems(response.data);
       localStorage.setItem('cart', JSON.stringify(response.products || []));
     } catch (error) {
@@ -37,9 +38,7 @@ function CartItem({item, idx}: {item: any, idx: number}) {
     setCartItems(prevItems => {
       if (!prevItems) return prevItems;
       const updatedProducts = [...prevItems.products];
-      console.log(updatedProducts);
       updatedProducts[index] = { ...updatedProducts[index], qty: newQuantity };
-      console.log(updatedProducts);
       return { ...prevItems, products: updatedProducts };
     });
   };
@@ -53,9 +52,8 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
       qty: newQuantity,
       type: 'product'
     }, {}, token, locale);
-    
+    toastHelper(response.data.status,response.data.message);
     setCartItems(response.data.data);
-    console.log('cartItems', cartItems);
   } catch (error) {
     console.error('Failed to update item quantity:', error);
   } finally {

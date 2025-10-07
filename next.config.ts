@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: 'ecommerce.demo.asol-tec.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        pathname: '/**',
+      },
     ],
   },
 };

@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { CheckCircle2, X } from 'lucide-react';
 import postRequest from '@/lib/post';
 import tokenGetter from '@/lib/tokenGetter';
+import toastHelper from '@/lib/toastHelper';
 function AppliedPromoCode() {
   const { cartItems,setCartItems } = useCart();
   const token = tokenGetter();
@@ -15,6 +16,7 @@ function AppliedPromoCode() {
       // Get cart ID from the cart data structure
       const cartId = (cartItems as { id?: string })?.id || (Array.isArray(cartItems) ? cartItems[0]?.id : undefined);
       const response = await postRequest('/marketplace/cart/delete-voucher/'+cartId, {}, {}, token);
+      toastHelper(response.data.status,response.data.message);
       setCartItems(response.data.data);
     } catch (error) {
       console.error('Failed to remove promo code:', error);
@@ -25,7 +27,7 @@ function AppliedPromoCode() {
   return (
     <div>
       <div className="mb-6 mt-2">
-            <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div className="flex items-center justify-between p-2 bg-green-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
               <div className="flex-1">
                 <div className='flex gap-2'>
 

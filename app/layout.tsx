@@ -9,6 +9,7 @@ import HeaderTopBar from "@/components/Header/header-top-bar";
 import Marquee from "@/components/Header/marquee";
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "react-hot-toast";
 type Props = {
   children: React.ReactNode;
 };
@@ -49,6 +50,7 @@ export default async function RootLayout({children}: Props) {
           
             </CartProvider>
           </ThemeProvider>
+          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         </NextIntlClientProvider>
       </body>
     </html>

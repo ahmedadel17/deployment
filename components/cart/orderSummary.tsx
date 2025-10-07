@@ -58,7 +58,7 @@ function OrderSummary() {
      
           </div>
 
-          <WalletBallanceToggler />
+         {cartItems?.user_balance!='0.00' && <WalletBallanceToggler />}
 
           <div className="space-y-3 mb-6">
            

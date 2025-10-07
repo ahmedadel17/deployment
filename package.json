@@ -6,10 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "getLang": "node ./scripts/getLang.mjs"
   },
   "dependencies": {
+    "@googlemaps/react-wrapper": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "@hypersokrat/hyper-pay": "^1.0.35",
+    "@react-google-maps/api": "^2.20.7",
     "@tailwindcss/typography": "^0.5.16",
     "axios": "^1.12.2",
     "country-codes-flags-phone-codes": "^1.1.1",
@@ -23,6 +27,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.63.0",
+    "react-hot-toast": "^2.6.0",
     "react-i18next": "^15.7.3",
     "react-world-flags": "^1.6.0",
     "yup": "^1.7.1"
