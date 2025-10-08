@@ -32,10 +32,10 @@ const ChooseExistingAddressForm: React.FC<ChooseExistingAddressFormProps> = ({
 }) => {
   const t = useTranslations();
   const locale = useLocale();
-  const { updateUserAddressId } = useOrderState();
+  const { orderState, updateUserAddressId } = useOrderState();
   const [existingAddresses, setExistingAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(orderState.user_address_id || '');
 
   const getExistingAddresses = useCallback(async() => {
     try {
@@ -70,6 +70,11 @@ const ChooseExistingAddressForm: React.FC<ChooseExistingAddressFormProps> = ({
   useEffect(() => {
     getExistingAddresses()
   }, [getExistingAddresses]);
+
+  // Sync local state with orderState when it changes
+  useEffect(() => {
+    setSelectedAddressId(orderState.user_address_id || '');
+  }, [orderState.user_address_id]);
 
   if (loading) {
     return (

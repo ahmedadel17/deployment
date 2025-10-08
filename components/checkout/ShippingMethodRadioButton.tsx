@@ -1,6 +1,7 @@
 import React from 'react';
 import { Field } from 'formik';
 import Image from 'next/image';
+import { useOrderState } from '@/context/OrderStateContext';
 interface ShippingOption {
   slug: string;
   name: string;
@@ -30,6 +31,7 @@ const ShippingMethodRadioButton: React.FC<ShippingMethodRadioButtonProps> = ({
   contentClassName = "ms-3 flex-1",
   onChange
 }) => {
+  const { orderState } = useOrderState();
   return (
     <label 
       key={option.slug} 
@@ -39,6 +41,7 @@ const ShippingMethodRadioButton: React.FC<ShippingMethodRadioButtonProps> = ({
         type="radio"
         name={name}
         value={option.slug}
+        checked={orderState.shipping_slug === option.slug}
         className={radioClassName}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           if (onChange) {
@@ -53,7 +56,7 @@ const ShippingMethodRadioButton: React.FC<ShippingMethodRadioButtonProps> = ({
                       <Image className='rounded-lg w-10 h-10 mr-2'  src={option.image} alt={option.name} width={100} height={100} />
 
                         <div>
-                        <div className="flex justify-between w-full border">
+                        <div className="flex justify-between w-full">
                             <span className="font-medium text-gray-900 dark:text-white w-full">{option.name}</span>
                             <span className="font-medium text-gray-900 dark:text-white"><span className="icon-riyal-symbol ms-1"></span>{option.price}</span>
                         </div>

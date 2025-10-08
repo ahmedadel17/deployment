@@ -1,9 +1,10 @@
 "use client"
 import { Formik, FormikHelpers } from 'formik';
-import React from 'react'
+import React, { useEffect } from 'react'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import CountryPhoneInput from '@/components/phone/CountryPhoneInput';
+import tokenGetter from '@/lib/tokenGetter';
 
 function Login() {
     interface PhoneFormValues {
@@ -12,6 +13,12 @@ function Login() {
     }
     
     const router = useRouter();
+    useEffect(() => {
+      const token = tokenGetter()
+      if(token){
+        router.push('/')
+      }
+    }, [])
   return (
   
 <>
@@ -44,7 +51,6 @@ function Login() {
       }}
       onSubmit={async (values: PhoneFormValues, { setSubmitting, setFieldError }: FormikHelpers<PhoneFormValues>) => {
         try {
-            console.log('Login attempt with phone:', values.phone);
             
             // Get country data from the countries list
             const countries = (await import('country-codes-flags-phone-codes')).countries;

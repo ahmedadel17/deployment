@@ -10,6 +10,7 @@ import { Check, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import tokenGetter from '@/lib/tokenGetter';
 import postRequest from '@/lib/post';
+import TotalAttribute from './totalAttribute';
 // Validation schema for promo code
 
 
@@ -67,13 +68,8 @@ function OrderSummary() {
               <OrderAttribute key={idx} t={t} {...item} />
             ))
           } 
-          
-            <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
-              <div className="flex justify-between">
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">{t('Total')}</span>
-                <span className="text-lg font-semibold text-gray-900 dark:text-white"><span className="icon-riyal-symbol" /><span>{cartItems?.amount_to_pay}</span></span>
-              </div>
-            </div>
+          <TotalAttribute value={cartItems?.amount_to_pay} label={t('Total')} />
+            
           </div>
 
           <button onClick={convertCartToOrder} className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</button>

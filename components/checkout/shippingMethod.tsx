@@ -20,14 +20,14 @@ interface ShippingOption {
 const ShippingMethod = () => {
   const t = useTranslations();
   const { cartItems } = useCart();
-  const { updateShippingSlug } = useOrderState();
+  const { orderState, updateShippingSlug } = useOrderState();
 
   const validationSchema = Yup.object({
     shipping: Yup.string().required(t('Please select a shipping method'))
   });
 
   const initialValues = {
-    shipping: 'standard'
+    shipping: orderState.shipping_slug || 'standard'
   }
   
   const onSubmit = (values: { shipping: string }) => {

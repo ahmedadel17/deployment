@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {useTranslations} from 'next-intl';
+import {useRouter} from "next/navigation";
+import { useCart } from "@/context/CartContext";
 
 type MenuItem = {
   title: string;
@@ -14,6 +16,9 @@ type MenuItem = {
 
 const HeaderAccount: React.FC = () => {
   const t = useTranslations();
+const router = useRouter();
+const { setCartItems } = useCart();
+
   const menuItems: MenuItem[] = [
     {
       title: "Dashboard",
@@ -57,11 +62,7 @@ const HeaderAccount: React.FC = () => {
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>`,
       url: "/dashboard-settings",
     },
-    {
-      title: "Logout",
-      icon: `<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>`,
-      url: "/logout",
-    },
+    
   ];
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -144,7 +145,14 @@ const HeaderAccount: React.FC = () => {
                   key={item.title}
                   href={item.url}
                   className={`flex gap-2 items-center px-4 py-2 text-sm rounded-md ${activeClass}`}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    if(item.title === 'Logout'){
+                      localStorage.removeItem('token')
+                      setCartItems([])
+                    }
+                    setIsOpen(false)
+
+                  }}
                 >
                   <svg
                     className="w-4 h-4"
@@ -157,6 +165,22 @@ const HeaderAccount: React.FC = () => {
                 </Link>
               );
             })}
+            <button
+              className={`flex gap-2 items-center px-4 py-2 text-sm rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700`}
+              onClick={() => {
+                localStorage.removeItem('token')
+                setCartItems([])
+              }}
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                dangerouslySetInnerHTML={{ __html: '<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>' }}
+              />
+              {t("Logout")}
+            </button>
           </div>
         </div>
       </div>

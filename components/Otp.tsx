@@ -4,6 +4,7 @@ import {useRouter} from 'next/navigation';
 import axios from "axios";
 import { useSearchParams } from 'next/navigation';
 import { getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji } from "country-codes-flags-phone-codes";
+import tokenGetter from "@/lib/tokenGetter";
 export default function Otp2() {
   const [otp, setOtp] = useState(Array(5).fill("")); // 6-digit OTP
   const [registrationData, setRegistrationData] = useState<string | null>(null);
@@ -12,7 +13,11 @@ export default function Otp2() {
   const phone = searchParams.get('phone');
   const country:string|null=searchParams.get('country');
   useEffect(()=>{
-    // Check if we're on the client side
+    // Check if we're useEffect(() => {
+      const token = tokenGetter()
+      if(token){
+        router.push('/')
+      }
     if (typeof window !== 'undefined') {
       const registrationData = localStorage.getItem('registrationData');
       setRegistrationData(registrationData);

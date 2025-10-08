@@ -7,26 +7,42 @@ import Image from 'next/image';
 import tokenGetter from '@/lib/tokenGetter';
 import postRequest from '@/lib/post';
 import toastHelper from '@/lib/toastHelper';
+import getRequest from '@/lib/getter';
+import { useRouter, usePathname } from 'next/navigation';
+import { ArrowLeftIcon } from 'lucide-react';
 function OrderSummary() {
   const { cartItems, setCartItems } = useCart();
-  const { orderState, isOrderComplete, getOrderPayload } = useOrderState();
+  const { orderState, goToPayment, getOrderPayload } = useOrderState();
+  const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations();
   const locale = useLocale();
 
   const handlePlaceOrder = async() => {
-    // if (!isOrderComplete()) {
-    //   alert(t('Please complete all required fields before placing your order'));
-    //   return;
-    // }
+    
 
     const payload = getOrderPayload();
     const response = await postRequest(`/marketplace/cart/cart-details/${cartItems?.id}`, payload, {}, tokenGetter(), locale);
     setCartItems(response.data.data);
     toastHelper(response.data.status,response.data.message);
+    if(response.data.status){
+      router.push('/checkout/payment');
+    }
+ 
+
+    
     
     // Here you would typically make an API call to place the order
     // For now, we'll just log the data
   };
+  const handlePayment = async() => {
+        if(orderState.payment_method=='cod'){
+      const response = await getRequest(`/payment/cash-on-delivery/${cartItems?.id}`, {}, locale, tokenGetter());
+      router.push(`/checkoutConfirmation?orderId=${cartItems?.id}`);
+
+      toastHelper(response.status,response.data.message);
+    }
+  }
   return (
     <div className="lg:col-span-1">
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 sticky top-4">
@@ -90,18 +106,38 @@ function OrderSummary() {
         <div>Shipping: {orderState.shipping_slug || 'Not selected'}</div>
         <div>Payment: {orderState.payment_method || 'Not selected'}</div>
         <div className="mt-2 font-semibold">
-          Status: {isOrderComplete() ? '✅ Complete' : '❌ Incomplete'}
+          Status: {goToPayment() ? '✅ Complete' : '❌ Incomplete'}
         </div>
       </div>
 
       {/* Place Order Button */}
-      <button
+     {
+     
+     goToPayment() && !pathname.includes('/payment') && <button
         onClick={handlePlaceOrder}
         className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {t('Place Order')}
-      </button>
+          <span>
 
+        {t('Proceed to Payment')}
+          </span>
+      </button>
+      }
+       {
+     
+     goToPayment() && pathname.includes('/payment') && <button
+        onClick={router.back}
+        className="w-full mt-6 py-3 flex items-center justify-center bg-primary-400 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        <span>{t('Return to Checkout')}</span>
+      </button>
+      }
+      {orderState.payment_method == 'cod' && <button
+        onClick={handlePayment}
+        className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        {t('Place Order')}
+      </button>}
       {/* Security Notice */}
       <div className="mt-4 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
         <svg className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

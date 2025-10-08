@@ -1,11 +1,9 @@
 'use client'
 import React, { useState } from 'react';
-import { Formik, Form, Field } from 'formik';
 import { useTranslations } from 'next-intl';
-import FormikInput from '@/components/ui/FormikInput';
-import * as Yup from 'yup';
 import Image from 'next/image';
-
+import { useOrderState } from '@/context/OrderStateContext';
+import HyperPayPayment from '@/components/checkout/hyperpay'
 interface PaymentMethodData {
   payment_method: string;
   card_number: string;
@@ -15,48 +13,42 @@ interface PaymentMethodData {
 }
 
 interface PaymentMethodsProps {
-  onSubmit: (values: PaymentMethodData) => void;
-  initialValues?: PaymentMethodData;
   allowedPaymentMethods?: string[];
 }
 
 const PaymentMethods: React.FC<PaymentMethodsProps> = ({ 
-  onSubmit, 
-  initialValues = {
+  allowedPaymentMethods = []
+}) => {
+  const t = useTranslations();
+  const { orderState, updatePaymentMethod } = useOrderState();
+  const [cardData, setCardData] = useState<PaymentMethodData>({
     payment_method: '',
     card_number: '',
     expiry_date: '',
     cvv: '',
     cardholder_name: ''
-  },
-  allowedPaymentMethods = []
-}) => {
-  const t = useTranslations();
-  const [selectedMethod, setSelectedMethod] = useState('');
-
-  const validationSchema = Yup.object({
-    payment_method: Yup.string().required(t('Please select a payment method')),
-    card_number: Yup.string().when('payment_method', {
-      is: (val: string) => ['visa', 'mastercard', 'mada'].includes(val),
-      then: (schema) => schema.required(t('Card number is required')),
-      otherwise: (schema) => schema.notRequired()
-    }),
-    expiry_date: Yup.string().when('payment_method', {
-      is: (val: string) => ['visa', 'mastercard', 'mada'].includes(val),
-      then: (schema) => schema.required(t('Expiry date is required')),
-      otherwise: (schema) => schema.notRequired()
-    }),
-    cvv: Yup.string().when('payment_method', {
-      is: (val: string) => ['visa', 'mastercard', 'mada'].includes(val),
-      then: (schema) => schema.required(t('CVV is required')),
-      otherwise: (schema) => schema.notRequired()
-    }),
-    cardholder_name: Yup.string().when('payment_method', {
-      is: (val: string) => ['visa', 'mastercard', 'mada'].includes(val),
-      then: (schema) => schema.required(t('Cardholder name is required')),
-      otherwise: (schema) => schema.notRequired()
-    })
   });
+
+  const handlePaymentMethodChange = (method: string) => {
+    updatePaymentMethod(method);
+    setCardData(prev => ({ ...prev, payment_method: method }));
+    
+    // If it's not a card payment, clear card data
+    if (!['visa', 'master', 'mada'].includes(method)) {
+      setCardData(prev => ({
+        ...prev,
+        card_number: '',
+        expiry_date: '',
+        cvv: '',
+        cardholder_name: ''
+      }));
+    }
+  };
+
+  const handleCardDataChange = (field: keyof PaymentMethodData, value: string) => {
+    const newCardData = { ...cardData, [field]: value };
+    setCardData(newCardData);
+  };
 
   const allPaymentOptions = [
     {
@@ -138,82 +130,42 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
           <p className="text-gray-600 dark:text-gray-400">{t('No payment methods available')}</p>
         </div>
       ) : (
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={onSubmit}
-        >
-          {({ setFieldValue }) => (
-            <Form>
-              <div className="space-y-3">
-                {paymentOptions.map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                  <Field
-                    type="radio"
-                    name="payment_method"
-                    value={option.value}
-                    className="text-primary-600"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setFieldValue('payment_method', e.target.value);
-                      setSelectedMethod(e.target.value);
-                    }}
-                  />
-                  <div className="ms-3 flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        {option.icon}
-                        <div>
-                          <span className="font-medium text-gray-900 dark:text-white">{option.label}</span>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{option.description}</p>
-                        </div>
+        <div>
+          <div className="space-y-3">
+            {paymentOptions.map((option) => (
+              <label key={option.value} className="flex items-center p-4 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment_method"
+                  value={option.value}
+                  checked={orderState.payment_method === option.value}
+                  className="text-primary-600"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handlePaymentMethodChange(e.target.value);
+                  }}
+                />
+                <div className="ms-3 flex-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {option.icon}
+                      <div>
+                        <span className="font-medium text-gray-900 dark:text-white">{option.label}</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{option.description}</p>
                       </div>
                     </div>
                   </div>
-                </label>
-              ))}
-            </div>
-
-            {/* Card Details Form (shown when card payment is selected) */}
-            {['visa', 'master', 'mada'].includes(selectedMethod) && (
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-4">{t('Card Details')}</h3>
-                <div className="space-y-4">
-                  <FormikInput
-                    name="card_number"
-                    label={t('Card Number')}
-                    placeholder="1234 5678 9012 3456"
-                    required
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormikInput
-                      name="expiry_date"
-                      label={t('Expiry Date')}
-                      placeholder="MM/YY"
-                      required
-                    />
-                    
-                    <FormikInput
-                      name="cvv"
-                      label={t('CVV')}
-                      placeholder="123"
-                      required
-                    />
-                  </div>
-                  
-                  <FormikInput
-                    name="cardholder_name"
-                    label={t('Cardholder Name')}
-                    placeholder="John Doe"
-                    required
-                  />
                 </div>
-              </div>
-            )}
-          </Form>
-        )}
-      </Formik>
+              </label>
+            ))}
+          </div>
+
+   
+        </div>
       )}
+     {orderState.payment_method!='cod' && orderState.payment_method && <div className='mt-4'>
+
+      <HyperPayPayment />
+      </div>}
     </div>
   );
 };

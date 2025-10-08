@@ -7,12 +7,14 @@ import { useCart } from '@/context/CartContext';
 import tokenGetter from '@/lib/tokenGetter';
 import { useLocale } from 'next-intl';
 import postRequest from '@/lib/post';
+import { useOrderState } from '@/context/OrderStateContext';
 
 
 export default function PaymentPage() {
   const [checkoutId, setCheckoutId] = useState<string>('');
   const [scriptLoaded, setScriptLoaded] = useState(false);
         const { cartItems } = useCart();
+        const { orderState } = useOrderState();
        const locale = useLocale()
   // Fetch checkout ID from YOUR Laravel API
   useEffect(() => {
@@ -21,10 +23,9 @@ export default function PaymentPage() {
         console.log('Fetching checkout ID for cart:', cartItems?.id);
         const response = await postRequest('/payment/hyper-pay/prepare-checkout', {
           order_id: cartItems?.id,
-          brand:'visa',
+          brand:orderState.payment_method,
         }, {}, tokenGetter(), locale);
 
-        console.log('API Response:', response);
         
         // Check different possible response structures
         const checkoutId = response?.data?.data?.checkoutId || 
@@ -32,7 +33,6 @@ export default function PaymentPage() {
                           response?.checkoutId;
         
         if (checkoutId) {
-          console.log('Checkout ID received:', checkoutId);
           setCheckoutId(checkoutId);
         } else {
           console.error('No checkout ID found in response:', response);
@@ -63,7 +63,7 @@ export default function PaymentPage() {
           supportedNetworks: ["amex", "discover", "masterCard", "visa"],
         },
       };
-  }, [scriptLoaded, checkoutId]);
+  }, [scriptLoaded, checkoutId, orderState.payment_method]);
 
   return (
     <section className="cart-page">
@@ -83,6 +83,7 @@ export default function PaymentPage() {
                   
                   <form
                     action={`https://ecommerce.demo.asol-tec.com/api/payment/hyper-pay/check-status`}
+                   
                     className="paymentWidgets"
                     data-brands="VISA MASTER MADA"
                   ></form>

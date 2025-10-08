@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import CreateNewAddressForm from './CreateNewAddressForm';
 import ChooseExistingAddressForm from './ChooseExistingAddressForm';
@@ -9,9 +9,9 @@ type AddressFormType = 'existing' | 'new';
 
 const ShippingAddressManager: React.FC = () => {
   const t = useTranslations();
-  const { updateUserAddressId } = useOrderState();
+  const { orderState, updateUserAddressId } = useOrderState();
   const [formType, setFormType] = useState<AddressFormType>('existing');
-  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(orderState.user_address_id || '');
 
   const handleAddressCreated = () => {
     // Update order state with new address data
@@ -31,6 +31,11 @@ const ShippingAddressManager: React.FC = () => {
     setSelectedAddressId('');
     updateUserAddressId('');
   };
+
+  // Sync local state with orderState when it changes
+  useEffect(() => {
+    setSelectedAddressId(orderState.user_address_id || '');
+  }, [orderState.user_address_id]);
 
   return (
     <div className="space-y-6">

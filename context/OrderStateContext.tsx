@@ -14,7 +14,7 @@ interface OrderStateContextType {
   updateShippingSlug: (shippingSlug: string) => void;
   updatePaymentMethod: (paymentMethod: string) => void;
   resetOrderState: () => void;
-  isOrderComplete: () => boolean;
+  goToPayment: () => boolean;
   getOrderPayload: () => OrderState;
 }
 
@@ -68,11 +68,11 @@ export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children
     });
   };
 
-  const isOrderComplete = () => {
+  const goToPayment = () => {
     return orderState.user_address_id !== '' && 
-           orderState.shipping_slug !== '' && 
-           orderState.payment_method !== '';
+           orderState.shipping_slug !== '' 
   };
+ 
 
   const getOrderPayload = () => {
     return orderState;
@@ -84,7 +84,7 @@ export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children
     updateShippingSlug,
     updatePaymentMethod,
     resetOrderState,
-    isOrderComplete,
+    goToPayment,
     getOrderPayload,
   };
 
