@@ -3,6 +3,7 @@ import axios from "axios";
 const getRequest = async (
   endpoint: string,
   headers:any,
+  body:any,
   locale:string,
   token?:string | null
 ) => {
@@ -17,6 +18,7 @@ const getRequest = async (
           ...headers,
            // merge custom headers
         },
+        data: body,
       }
     );
     console.log(response.data);

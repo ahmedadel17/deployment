@@ -4,7 +4,7 @@ import {useRouter} from 'next/navigation';
 import axios from "axios";
 import { useSearchParams } from 'next/navigation';
 import { getCountryDialCodeFromCountryCodeOrNameOrFlagEmoji } from "country-codes-flags-phone-codes";
-import tokenGetter from "@/lib/tokenGetter";
+import { useToken } from "@/context/Token";
 export default function Otp2() {
   const [otp, setOtp] = useState(Array(5).fill("")); // 6-digit OTP
   const [registrationData, setRegistrationData] = useState<string | null>(null);
@@ -12,17 +12,18 @@ export default function Otp2() {
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone');
   const country:string|null=searchParams.get('country');
+  const { token, setToken } = useToken();
+  const router = useRouter();
+  
   useEffect(()=>{
-    // Check if we're useEffect(() => {
-      const token = tokenGetter()
-      if(token){
-        router.push('/')
-      }
+    if(token){
+      router.push('/')
+    }
     if (typeof window !== 'undefined') {
       const registrationData = localStorage.getItem('registrationData');
       setRegistrationData(registrationData);
     }
-  },[]);
+  },[token, router]);
   
 const handleSubmit=async()=>{
   setIsSubmitting(true);
@@ -33,7 +34,7 @@ const handleSubmit=async()=>{
       console.log('Sending complete registration data:', newRegistrationData);
       const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('token', JSON.stringify(response.data.data.token));
+        setToken(response.data.data.token);
         localStorage.removeItem('registrationData');
       }
       router.push("/");
@@ -44,7 +45,7 @@ const handleSubmit=async()=>{
       console.log('Sending login data:', newRegistrationData);
       const response=await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/login-or-register", newRegistrationData);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('token', JSON.stringify(response.data.data.token));
+        setToken(response.data.data.token);
       }
       router.push("/");
     }
@@ -56,7 +57,6 @@ const handleSubmit=async()=>{
   }
 }
 
-const router = useRouter();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]); // Array of refs for each input field
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -1,18 +1,19 @@
 import React from 'react'
 import {useLocale, useTranslations} from 'next-intl'
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import { useOrderState } from '@/context/OrderStateContext';
 import OrderAttribute from '../cart/orderAttribute';
 import Image from 'next/image';
-import tokenGetter from '@/lib/tokenGetter';
+import { useToken } from '@/context/Token';
 import postRequest from '@/lib/post';
 import toastHelper from '@/lib/toastHelper';
 import getRequest from '@/lib/getter';
 import { useRouter, usePathname } from 'next/navigation';
-import { ArrowLeftIcon } from 'lucide-react';
+import { CartItem } from '@/types/cart';
 function OrderSummary() {
-  const { cartItems, setCartItems } = useCart();
-  const { orderState, goToPayment, getOrderPayload } = useOrderState();
+  const { Cart, setCart } = useCart();
+  const { token } = useToken();
+  const { orderState, goToPayment, getOrderPayload, updateShippingRates } = useOrderState();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
@@ -22,26 +23,74 @@ function OrderSummary() {
     
 
     const payload = getOrderPayload();
-    const response = await postRequest(`/marketplace/cart/cart-details/${cartItems?.id}`, payload, {}, tokenGetter(), locale);
-    setCartItems(response.data.data);
+    const response = await postRequest(`/marketplace/cart/cart-details/${Cart?.id}`, payload, {}, token, locale);
+    setCart(response.data.data);
     toastHelper(response.data.status,response.data.message);
     if(response.data.status){
       router.push('/checkout/payment');
     }
- 
 
-    
-    
-    // Here you would typically make an API call to place the order
-    // For now, we'll just log the data
   };
+  const goToShippingMethod = async() => {
+    // Extract product variations from cart items
+    const productVariations = Cart?.products?.map(item => ({
+      item_id: item.id,
+      qty: item.qty,
+      attributes: item.attributes || {}
+    })) || [];
+
+    const response = await postRequest(`/marketplace/cart/shipping-rates`, {
+      user_address_id: orderState.user_address_id,
+      order_id: Cart?.id,
+      products: productVariations
+    }, {}, token, locale);
+    
+    console.log(response.data.data.shipping_methods);
+    // Save shipping rates to order context
+    if (response.data && response.data.data) {
+      updateShippingRates(response.data.data.shipping_methods);
+    }
+    
+    router.push('/checkout/ShippingMethod');
+  }
   const handlePayment = async() => {
         if(orderState.payment_method=='cod'){
-      const response = await getRequest(`/payment/cash-on-delivery/${cartItems?.id}`, {}, locale, tokenGetter());
-      router.push(`/checkoutConfirmation?orderId=${cartItems?.id}`);
+      if (!token) {
+        console.error('No token available');
+        return;
+      }
+      
+      const response = await getRequest(`/payment/cash-on-delivery/${Cart?.id}`, {}, {}, locale, token);
+      router.push(`/checkoutConfirmation?orderId=${Cart?.id}`);
 
       toastHelper(response.status,response.data.message);
     }
+  }
+
+  // Helper functions for conditional logic
+  const isAmountZero = () => {
+    const totalAmount = parseFloat((Cart as { total_amount?: string })?.total_amount || '0');
+    return totalAmount === 0;
+  };
+
+
+
+  const isPaymentMethodSelected = () => {
+    return orderState.payment_method && orderState.payment_method !== '';
+  };
+
+  const isOnShippingMethodPage = () => {
+    return pathname.includes('/ShippingMethod');
+  };
+
+  const isOnPaymentPage = () => {
+    return pathname.includes('/payment');
+  };
+  const convertIntoOrder = async() => {
+    const response = await postRequest(`/marketplace/cart/convert-into-order`, {
+      cart_id: Cart?.id,
+    }, {}, token, locale);
+    router.push(`/checkoutConfirmation?orderId=${response.data.data.id}`);
   }
   return (
     <div className="lg:col-span-1">
@@ -50,18 +99,20 @@ function OrderSummary() {
 
       {/* Order Items */}
       <div className="space-y-4 mb-6">
-        {cartItems?.products.map((item: any, index: number) => (
+        {Cart?.products.map((item: CartItem, index: number) => (
           <div key={index} className="flex items-center space-x-4 rtl:space-x-reverse">
             <Image 
-              src={item.image} 
-              alt={item.name} 
+              src={item.image || '/placeholder.jpg'} 
+              alt={item.name || 'Product'} 
               width={100} 
               height={100} 
               className="w-16 h-16 object-cover rounded-md" 
             />
             <div className="flex-1">
               <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{item.variation}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {typeof item.variations === 'string' ? item.variations : ''}
+              </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">{t('Qty')}: {item.qty}</p>
             </div>
             <div className="text-right">
@@ -80,12 +131,12 @@ function OrderSummary() {
           <span className="text-gray-600 dark:text-gray-400">{t('Subtotal')}</span>
             <span className="text-gray-900 dark:text-white">
               <span className="icon-riyal-symbol text-xs"></span>
-              <span>{(cartItems as any)?.sub_total || '0'}</span>
+              <span>{(Cart as { sub_total?: string })?.sub_total || '0'}</span>
             </span>
         </div>
       {
-        cartItems?.order_attributes?.map((item: any, index: number) => (
-            <OrderAttribute key={index} {...item} />
+        Cart?.order_attributes?.map((item, index: number) => (
+            <OrderAttribute key={index} {...item} t={t} />
         ))
       }
         <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
@@ -93,7 +144,7 @@ function OrderSummary() {
             <span className="text-lg font-semibold text-gray-900 dark:text-white">{t('Total')}</span>
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
               <span className="icon-riyal-symbol"></span>
-              <span>{(cartItems as any)?.total_amount || '0'}</span>
+              <span>{(Cart as { total_amount?: string })?.total_amount || '0'}</span>
             </span>
           </div>
         </div>
@@ -110,34 +161,67 @@ function OrderSummary() {
         </div>
       </div>
 
-      {/* Place Order Button */}
-     {
-     
-     goToPayment() && !pathname.includes('/payment') && <button
-        onClick={handlePlaceOrder}
-        className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-          <span>
+      {/* Conditional Buttons */}
+      
+      {/* 1. If amount is 0.00, show Place Order button */}
+      {isAmountZero() && (
+        <button
+          onClick={handlePayment}
+          className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t('Place Order')}
+        </button>
+      )}
 
-        {t('Proceed to Payment')}
-          </span>
-      </button>
-      }
-       {
+      {/* 2. Go to Shipping Method - Hide if shipping address selected and not on shipping method page */}
+      { !isOnShippingMethodPage() && !isOnPaymentPage() ? (
+        <button
+          onClick={goToShippingMethod}
+          className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t('Go to Shipping Method')}
+        </button>
+      ) : null}
+
+      {/* 3. Proceed to Payment - Show if payment method not selected and not on payment page */}
+      {orderState?.user_address_id &&!isPaymentMethodSelected() && !isOnPaymentPage() && (
+        <button
+          onClick={handlePlaceOrder}
+          className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t('Proceed to Payment')}
+        </button>
+      )}
+
+      {/* 4. Return to Checkout - Show on payment page */}
+      {isOnPaymentPage() && (
+        <button
+          onClick={router.back}
+          className="w-full mt-6 py-3 flex items-center justify-center bg-primary-400 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          <span>{t('Return to Checkout')}</span>
+        </button>
+      )}
+
+      {/* 5. Place Order for COD - Show if payment method is COD and not zero amount */}
+      {orderState.payment_method === 'cod' && !isAmountZero() && (
+        <button
+          onClick={handlePayment}
+          className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t('Place Order')}
+        </button>
+      )}
+        {/* 5. Place Order for COD - Show if payment method is COD and not zero amount */}
+        {isAmountZero() && (
+        <button
+          onClick={convertIntoOrder}
+          className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {t('Place Order')}
+        </button>
+      )}
      
-     goToPayment() && pathname.includes('/payment') && <button
-        onClick={router.back}
-        className="w-full mt-6 py-3 flex items-center justify-center bg-primary-400 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        <span>{t('Return to Checkout')}</span>
-      </button>
-      }
-      {orderState.payment_method == 'cod' && <button
-        onClick={handlePayment}
-        className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        {t('Place Order')}
-      </button>}
       {/* Security Notice */}
       <div className="mt-4 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
         <svg className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

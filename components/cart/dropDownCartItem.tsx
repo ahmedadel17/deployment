@@ -1,43 +1,43 @@
 'use client'
 import Image from 'next/image'
-import { useCart } from '@/context/CartContext'
+import { useCart } from '@/context/Cart'
 import { CartItem } from '@/types/cart'
 import DeleteButton from '@/components/ui/DeleteButton'
-import tokenGetter from '@/lib/tokenGetter'
+import { useToken } from '@/context/Token'
 import { useLocale } from 'next-intl'
 import { deleteCartItem } from '@/lib/cartHelpers'
 import toastHelper from '@/lib/toastHelper'
 
-type Props = {
-  items: CartItem[]
-}
-
-export default function DropDownCartItem({items}: Props) {
-  const { cartItems, setCartItems } = useCart();
-  const token = tokenGetter();
+export default function DropDownCartItem() {
+  const { Cart, setCart } = useCart();
+  const { token, isInitialized } = useToken();
   const locale = useLocale();
   const deleteItem = async (item_id: string) => {
+    if (!isInitialized || !token) {
+      console.log('Token not available yet');
+      return;
+    }
+    
     try {
       
       const response = await deleteCartItem({
-        orderId: (cartItems as { id?: string })?.id || '',
+        orderId: (Cart as { id?: string })?.id || '',
         itemId: item_id,
         token,
         locale
       });
 
       toastHelper(response.data.status,response.data.message,'Item deleted successfully','Item not deleted');
-      setCartItems(response.data);
+      setCart(response.data);
       localStorage.setItem('cart', JSON.stringify(response.products || []));
     } catch (error) {
       console.error('Failed to delete item:', error);
-    } finally {
     }
   }
   return (
     <>
       {
-      (items as { products?: Array<{ id: string; name: string; image: string; qty: number; price: number }> })?.products?.map((item, index: number) => (
+      Cart?.products?.map((item, index: number) => (
         <div key={index} className="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex-shrink-0">
             {item.image && (
@@ -53,7 +53,7 @@ export default function DropDownCartItem({items}: Props) {
             </div>
           </div>
           <DeleteButton
-            onDelete={() => deleteItem(item.id)}
+            onDelete={() => deleteItem(item.id.toString())}
             size="md"
             variant="icon"
           />

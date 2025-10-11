@@ -7,7 +7,8 @@ import FooterStyle1 from "@/components/Footer/styles/style1";
 import "./globals.css";
 import HeaderTopBar from "@/components/Header/header-top-bar";
 import Marquee from "@/components/Header/marquee";
-import { CartProvider } from "@/context/CartContext";
+import { CartProvider } from "@/context/Cart";
+import { TokenProvider } from "@/context/Token";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "react-hot-toast";
 type Props = {
@@ -36,19 +37,21 @@ export default async function RootLayout({children}: Props) {
       <body className={`${dir === 'rtl' ? 'font-rtl' : 'font-ltr'} ${geistMono.variable} min-h-screen flex flex-col`} >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
-            <CartProvider>
-        
-            <Marquee/>
-            <HeaderTopBar/>
-            <HeaderStyle1 />
-        
-            <main className="flex-1 dark:bg-gray-900 bg-gray-50">
-              {children}
-            </main>
+            <TokenProvider>
+              <CartProvider>
             
-            <FooterStyle1 />
+              <Marquee/>
+              <HeaderTopBar/>
+              <HeaderStyle1 />
           
-            </CartProvider>
+              <main className="flex-1 dark:bg-gray-900 bg-gray-50">
+                {children}
+              </main>
+              
+              <FooterStyle1 />
+            
+              </CartProvider>
+            </TokenProvider>
           </ThemeProvider>
           <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         </NextIntlClientProvider>

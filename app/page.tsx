@@ -9,7 +9,7 @@ async function page() {
   const locale = await getLocale();
   const homeData = await getRequest(`/home-v2`, {
     'Accept-Language': locale,
-  });
+  }, {}, locale, null);
   console.log(homeData);
 
   return (

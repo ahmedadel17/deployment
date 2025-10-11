@@ -1,5 +1,13 @@
 
-function OrderAttribute(props: {t: any}) {
+interface OrderAttributeProps {
+  t: any;
+  label: string;
+  value: string | number;
+  color?: string;
+  showCurrency?: boolean;
+}
+
+function OrderAttribute(props: OrderAttributeProps) {
   return (
     <div className="flex justify-between">
     <span style={{color: props.color}} className="text-gray-600 dark:text-gray-400">{props.label}</span>

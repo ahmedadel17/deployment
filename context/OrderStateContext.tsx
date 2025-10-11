@@ -2,10 +2,19 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Types
+interface ShippingRate {
+  id: string;
+  name: string;
+  cost: number;
+  estimated_days: string;
+  [key: string]: string | number | boolean;
+}
+
 interface OrderState {
   user_address_id: string;
   shipping_slug: string;
   payment_method: string;
+  shipping_rates: ShippingRate[];
 }
 
 interface OrderStateContextType {
@@ -13,6 +22,7 @@ interface OrderStateContextType {
   updateUserAddressId: (addressId: string) => void;
   updateShippingSlug: (shippingSlug: string) => void;
   updatePaymentMethod: (paymentMethod: string) => void;
+  updateShippingRates: (shippingRates: ShippingRate[]) => void;
   resetOrderState: () => void;
   goToPayment: () => boolean;
   getOrderPayload: () => OrderState;
@@ -37,6 +47,7 @@ export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children
     user_address_id: '',
     shipping_slug: '',
     payment_method: '',
+    shipping_rates: [],
   });
 
   const updateUserAddressId = (addressId: string) => {
@@ -60,11 +71,19 @@ export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children
     }));
   };
 
+  const updateShippingRates = (shippingRates: ShippingRate[]) => {
+    setOrderState(prev => ({
+      ...prev,
+      shipping_rates: shippingRates,
+    }));
+  };
+
   const resetOrderState = () => {
     setOrderState({
       user_address_id: '',
       shipping_slug: '',
       payment_method: '',
+      shipping_rates: [],
     });
   };
 
@@ -83,6 +102,7 @@ export const OrderStateProvider: React.FC<OrderStateProviderProps> = ({ children
     updateUserAddressId,
     updateShippingSlug,
     updatePaymentMethod,
+    updateShippingRates,
     resetOrderState,
     goToPayment,
     getOrderPayload,

@@ -1,26 +1,26 @@
 'use client'
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Formik, Form } from 'formik';
 import { useTranslations } from 'next-intl';
 import * as Yup from 'yup';
 import ShippingMethodRadioButton from './ShippingMethodRadioButton';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import { useOrderState } from '@/context/OrderStateContext';
 
-interface ShippingOption {
-  slug: string;
+// Import ShippingRate type from OrderStateContext
+interface ShippingRate {
+  id: string;
   name: string;
-  price: string;
-  description: string;
-  image: string;
-  value: string;
-  label: string;
+  cost: number;
+  estimated_days: string;
+  [key: string]: string | number | boolean;
 }
 
 const ShippingMethod = () => {
   const t = useTranslations();
-  const { cartItems } = useCart();
+  const { Cart } = useCart();
   const { orderState, updateShippingSlug } = useOrderState();
+  
 
   const validationSchema = Yup.object({
     shipping: Yup.string().required(t('Please select a shipping method'))
@@ -34,6 +34,7 @@ const ShippingMethod = () => {
     console.log('Shipping method selected:', values.shipping);
     updateShippingSlug(values.shipping);
   }
+  console.log(orderState)
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 my-4">
@@ -47,9 +48,22 @@ const ShippingMethod = () => {
         {({ setFieldValue }) => (
           <Form>
             <div className="space-y-3">
-              {(cartItems as { shipping_methods?: ShippingOption[] })?.shipping_methods?.map((option: ShippingOption) => (
+          
+              {orderState?.shipping_rates?.map((rate: ShippingRate) => {
+                // Transform ShippingRate to ShippingOption format
+                const option = {
+                  slug: rate.slug,
+                  name: rate.name,
+                  price: rate?.price?.toString(),
+                  description: `Estimated delivery: ${rate.estimated_days}`,
+                  image: rate?.image, // Default image
+                  value: rate.id,
+                  label: rate.name
+                };
+                
+                return (
                 <ShippingMethodRadioButton
-                  key={option.slug}
+                  key={rate.id}
                   option={option}
                   name="shipping"
                   onChange={(value: string) => {
@@ -57,7 +71,8 @@ const ShippingMethod = () => {
                     updateShippingSlug(value);
                   }}
                 />
-              ))}
+                );
+              })}
             </div>
           </Form>
         )}

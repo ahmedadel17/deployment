@@ -33,11 +33,11 @@ const ShippingMethodRadioButton: React.FC<ShippingMethodRadioButtonProps> = ({
 }) => {
   const { orderState } = useOrderState();
   return (
-    <label 
-      key={option.slug} 
-      className={`${labelClassName} ${className}`}
-    >
-      <Field
+    
+  <>
+    <label   key={option.slug} 
+      className={`${labelClassName} ${className}`}>
+    <Field
         type="radio"
         name={name}
         value={option.slug}
@@ -49,25 +49,24 @@ const ShippingMethodRadioButton: React.FC<ShippingMethodRadioButtonProps> = ({
           }
         }}
       />
-      <div className={contentClassName}>
-      <div className="ms-3 flex-1 w-full">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center">
-                      <Image className='rounded-lg w-10 h-10 mr-2'  src={option.image} alt={option.name} width={100} height={100} />
-
-                        <div>
-                        <div className="flex justify-between w-full">
-                            <span className="font-medium text-gray-900 dark:text-white w-full">{option.name}</span>
-                            <span className="font-medium text-gray-900 dark:text-white"><span className="icon-riyal-symbol ms-1"></span>{option.price}</span>
-                        </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{option.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-    
-      </div>
-    </label>
+    <div className="ms-3 flex-1">
+      
+        <div className="flex justify-between ">
+           <span className="flex  ">
+           <Image className='rounded-lg w-10 h-10 mr-2 '  src={option.image} alt={option.name} width={100} height={100} />
+            <span className ="font-medium text-gray-900 dark:text-white ">
+              
+              {option.name}
+              
+        <p className="text-sm text-gray-600 dark:text-gray-400 ">{option.description}</p>
+              </span>
+           </span>
+            <span className="font-medium text-gray-900 dark:text-white"><span className="icon-riyal-symbol ms-1"></span>{option.price}</span>
+        </div>
+    </div>
+</label>
+  
+  </>
   );
 };
 

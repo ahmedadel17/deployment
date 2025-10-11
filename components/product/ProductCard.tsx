@@ -1,91 +1,181 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types/product';
-import { CartItem } from '@/types/cart';
-import { useCart } from "@/context/CartContext";
-import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
+import postRequest from '@/lib/post';
+import { useToken } from '@/context/Token';
+import toastHelper from '@/lib/toastHelper';
+import { useCart } from '@/context/Cart';
+import ProductImage from './productCard/productImage';
+import ProductInfo from './productCard/productInfo';
+import ProductVariations from './productCard/productVariations';
+import ProductActions from './productCard/productActions';
+import ProductWishlist from './productCard/productWishlist';
 interface ProductCardProps {
   product: Product;
   carousel?: boolean;
 }
 
 export default function ProductCard({ product, carousel = false }: ProductCardProps) {
-  const t = useTranslations();
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
+  const locale = useLocale();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedColor, setSelectedColor] = useState<any>('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedSize, setSelectedSize] = useState<any>('');
   const [isWishlisted, setIsWishlisted] = useState<boolean>(Boolean(product?.is_is_favourite));
-  const [isComparing, setIsComparing] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
+  const [isLoadingVariations, setIsLoadingVariations] = useState(false);
+  const { setCart } = useCart();
+  const { token } = useToken();  
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
   };
-  const { cartItems, setCartItems } = useCart();
-  const addToCart = (item: Product) => {
-    const cartItem: CartItem = {
-      ...item,
-      name: String(item.name ?? item.title),
-      price_after_discount: Number(item.price_after_discount ?? item.price ?? 0),
-      thumbnail: String(item.thumbnail ?? '/assets/images/placeholder.jpg'),
-      quantity: 1,
-      qty: 1,
-    };
-    setCartItems([...cartItems, cartItem]);
-  };
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(product);
-    setIsAddedToCart(true);
-    setTimeout(() => setIsAddedToCart(false), 2000);
+
+  // Helper function to get current product (original or variation)
+  const getCurrentProduct = () => {
+    return productWithVariations || product;
   };
 
-  const handleCompareToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsComparing(!isComparing);
+
+
+  // Function to get product variations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getProductByVariations = async (showSuccessMessage = false, newColor: any = null, newSize: any = null) => {
+    try {
+      setIsLoadingVariations(true);
+      
+      // Use passed values or current state
+      const currentColor = newColor !== null ? newColor : selectedColor;
+      const currentSize = newSize !== null ? newSize : selectedSize;
+      
+      // Build variations object from selected color and size
+      const variations: { [key: string]: string } = {};
+      
+      if (currentColor && typeof currentColor === 'object' && 'id' in currentColor) {
+        console.log('currentColor', currentColor);
+        variations[product.variations?.[1]?.attribute_id || 'color'] = currentColor.id;
+      }
+      
+      if (currentSize && typeof currentSize === 'object' && 'id' in currentSize) {
+        console.log('currentSize', currentSize);
+        variations[product.variations?.[0]?.attribute_id || 'size'] = currentSize.id;
+      }
+      
+      console.log('Selected variations:', variations);
+      
+      // If no variations selected, reset to original product
+      if (Object.keys(variations).length === 0) {
+        setProductWithVariations(null);
+        if (showSuccessMessage) {
+    setIsAddedToCart(true);
+    setTimeout(() => setIsAddedToCart(false), 2000);
+        }
+        return;
+      }
+      
+      const requestBody = {
+        product_id: product.id.toString(),
+        attributes: variations
+      };
+      
+      const response = await postRequest('/catalog/products/get-variation-by-attribute', requestBody, { 'Content-Type': 'application/json' }, null, locale);
+      console.log('Product variation response:', response);
+      setProductWithVariations(response.data.data);
+      
+      if (showSuccessMessage) {
+        setIsAddedToCart(true);
+        setTimeout(() => setIsAddedToCart(false), 2000);
+      }
+      console.log('Current product:', getCurrentProduct());
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching product variations:', error);
+      throw error;
+    } finally {
+      setIsLoadingVariations(false);
+    }
   };
+  // Check if product has variations
+  const hasVariations = Boolean(product?.variations && product.variations.length > 0);
+  
+  // Check if all required variations are selected
+  const areAllVariationsSelected = () => {
+    if (!hasVariations) return true;
+    
+    // Check if color is required and selected
+    const colorRequired = product.variations?.[1]?.values && product.variations[1].values.length > 0;
+    const colorSelected = selectedColor && typeof selectedColor === 'object' && 'id' in selectedColor;
+    
+    // Check if size is required and selected
+    const sizeRequired = product.variations?.[0]?.values && product.variations[0].values.length > 0;
+    const sizeSelected = selectedSize && typeof selectedSize === 'object' && 'id' in selectedSize;
+    
+    return (!colorRequired || colorSelected) && (!sizeRequired || sizeSelected);
+  };
+
+  const AddToCart = async () => {
+    // Validate variations if product has them
+    if (hasVariations && !areAllVariationsSelected()) {
+      toastHelper(false, 'Please select all required variations (color and size) before adding to cart');
+      return;
+    }
+
+    try {
+      setIsLoadingVariations(true);
+      
+      const requestBody = {
+        item_id: (productWithVariations?.id ?? (product as any)?.default_variation_id ?? product.id).toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        qty: 1,
+        customer_note: '',
+        type: 'product',
+        // Include attributes if variations are selected
+        ...(hasVariations && areAllVariationsSelected() && {
+          attributes: {
+            ...(selectedColor && typeof selectedColor === 'object' && 'id' in selectedColor && {
+              [product.variations?.[1]?.attribute_id || 'color']: (selectedColor as any).id // eslint-disable-line @typescript-eslint/no-explicit-any
+            }),
+            ...(selectedSize && typeof selectedSize === 'object' && 'id' in selectedSize && {
+              [product.variations?.[0]?.attribute_id || 'size']: (selectedSize as any).id // eslint-disable-line @typescript-eslint/no-explicit-any
+            })
+          }
+        })
+      };
+      
+      // Token is now available from context
+      const response = await postRequest('/marketplace/cart/add-to-cart', requestBody, { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, token);
+      toastHelper(response.data.status, response.data.message);
+      
+      // Add products from response to cart context
+      if (response.data.data.products && Array.isArray(response.data.data.products)) {
+        setCart(() => {
+          // Update localStorage immediately
+          localStorage.setItem('cart', JSON.stringify(response.data.data));
+          return response.data.data;
+        });
+      }
+      
+      setIsAddedToCart(true);
+      setTimeout(() => setIsAddedToCart(false), 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toastHelper(false, 'Failed to add product to cart');
+    } finally {
+      setIsLoadingVariations(false);
+    }
+  }
 
  
 
-  const getBadgeClasses = (type: string) => {
-    const badgeClasses = {
-      'new': 'bg-green-500/20 text-green-500',
-      'sale': 'bg-red-500/20 text-red-500',
-      'bestseller': 'bg-blue-500/20 text-blue-500',
-      'limited': 'bg-purple-500/20 text-purple-500',
-      'hot': 'bg-orange-500/20 text-orange-500',
-    };
-    return badgeClasses[type as keyof typeof badgeClasses] || 'bg-gray-500 text-white';
-  };
 
-  const getColorClass = (color: string) => {
-    const colorMap: { [key: string]: string } = {
-      'blue': 'bg-blue-500',
-      'black': 'bg-black',
-      'gray': 'bg-gray-500',
-      'white': 'bg-white border border-gray-300',
-      'green': 'bg-green-500',
-      'orange': 'bg-orange-500',
-      'red': 'bg-red-500',
-      'pink': 'bg-pink-500',
-      'purple': 'bg-purple-500',
-      'yellow': 'bg-yellow-500',
-      'cream': 'bg-yellow-100',
-      'navy': 'bg-navy-800',
-      'beige': 'bg-yellow-100',
-      'burgundy': 'bg-red-800',
-      'gold': 'bg-yellow-400',
-      'denim': 'bg-blue-600',
-    };
-    return colorMap[color] || 'bg-gray-400';
-  };
+ 
+
+ 
+
 
   return (
     <div 
@@ -99,189 +189,36 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
       
     >
       {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden bg-white dark:bg-gray-800">
-        <div className="product-thumbnail relative block overflow-hidden rounded-lg lg:rounded-t-lg lg:rounded-b-none group">
-          {/* Product Badges */}
-          {product.badges && product.badges.length > 0 && (
-            <div className="product-badges absolute top-2 start-2 z-10 flex flex-col gap-1">
-              {product.badges.map((badge, index) => (
-                <span
-                  key={index}
-                  className={`product-badge px-2 py-1 text-xs font-semibold rounded-full ${getBadgeClasses(badge.type)}`}
-                >
-                  {badge.text}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Hover Buttons - Center of Image */}
-          <div className="product-hover-btns absolute inset-0 pointer-events-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-30 z-20 gap-1">
-            {/* Compare Button */}
-            {/* <button
-              onClick={handleCompareToggle}
-              className={`compare-btn w-8 h-8 lg:w-10 lg:h-10 bg-white text-gray-700 rounded-full shadow-lg hover:bg-primary-300 hover:text-white transition-all duration-200 flex items-center justify-center ${
-                isComparing ? 'bg-primary-300 text-white' : ''
-              }`}
-              data-product-id={product.id}
-              title="Add to Compare"
-            >
-              <svg className="w-4 h-4 lg:w-5 lg:h-5" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="18" r="3" />
-                <circle cx="6" cy="6" r="3" />
-                <path d="M13 6h3a2 2 0 0 1 2 2v7" />
-                <path d="M11 18H8a2 2 0 0 1-2-2V9" />
-              </svg>
-            </button> */}
-
-            {/* Quick View Button */}
-            <Link
-            href={`/products/${product.id}`}
-              className="quick-view-btn w-8 h-8 lg:w-10 lg:h-10 bg-white text-gray-700 rounded-full shadow-lg hover:bg-primary-300 hover:text-white transition-colors duration-200 flex items-center justify-center"
-              title="Quick View"
-            >
-              <svg className="w-4 h-4 lg:w-5 lg:h-5" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-            </Link>
-          </div>
-
-          {/* Thumbnail Main Image */}
-          <Image
-            src={product?.thumbnail || '/assets/images/placeholder.jpg'}
-            alt={product.name || ''}
-            width={300}
-            height={320}
-            className="w-full h-full object-cover transition-all duration-500 ease-in-out transform min-h-[320px]"
-            priority
-          />
-
-          {/* Thumbnail Flip Image */}
-          {product.thumbnail && (
-            <Image
-              src={product.thumbnail}
-              alt={`${product.name} hover image`}
-              width={300}
-              height={320}
-              className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out transform scale-105 opacity-0 group-hover:scale-100 group-hover:opacity-100"
-            />
-          )}
-        </div>
-      </div>
+    
+      <ProductImage product={getCurrentProduct()} productWithVariations={getCurrentProduct()} />
 
       {/* Product Info */}
       <div className="p-4 flex flex-col flex-1">
-        <div className="flex-1">
-          <Link href={`/products/${product.id}`}>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
-              {product.name}
-            </h3>
-          </Link>
-          <Link href={`/products/${product.id}`}>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
-              {product.short_description}
-            </h4>
-          </Link>
+        <ProductInfo product={product} getCurrentProduct={getCurrentProduct} />
 
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg font-bold text-gray-900 dark:text-white">
-              ${product?.price_after_discount}
-            </span>
-            {product.min_price && (
-              <span className="text-sm text-gray-500 line-through">
-                ${product.min_price }
-              </span>
-            )}
-          </div>
-
-          {/* Color Options */}
-          {/* {product.colors && product.colors.length > 1 && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs text-gray-500">Colors:</span>
-              <div className="flex gap-1">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`w-4 h-4 rounded-full border-2 transition-all ${
-                      getColorClass(color)
-                    } ${
-                      selectedColor === color ? 'border-gray-900 dark:border-white' : 'border-gray-300'
-                    }`}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </div>
-          )} */}
-
-          {/* Size Options
-          {product.sizes && product.sizes.length > 1 && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs text-gray-500">Sizes:</span>
-              <div className="flex gap-1">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-2 py-1 text-xs border rounded transition-colors ${
-                      selectedSize === size
-                        ? 'border-blue-600 text-black bg-primary-50 dark:bg-blue-600 dark:text-white'
-                        : 'border-gray-300 text-gray-600 dark:text-gray-400 hover:border-gray-400'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )} */}
-        </div>
+        <ProductVariations 
+          product={product}
+          selectedColor={selectedColor}
+          selectedSize={selectedSize}
+          setSelectedColor={setSelectedColor}
+          setSelectedSize={setSelectedSize}
+          getProductByVariations={getProductByVariations}
+        />
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleAddToCart}
-            disabled={isAddedToCart}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium duration-300 flex items-center justify-center gap-2 ${
-              isAddedToCart
-                ? 'bg-green-500 text-white'
-                : 'bg-primary-500 text-white hover:bg-primary-600'
-            }`}
-          >
-            {isAddedToCart ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className='hidden lg:block'>Added!</span>
-             
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-6 h-6 lg:w-4 lg:h-4" />
-                <span className='hidden lg:block'>
+          <ProductActions
+            isAddedToCart={isAddedToCart}
+            isLoadingVariations={isLoadingVariations}
+            hasVariations={hasVariations}
+            areAllVariationsSelected={areAllVariationsSelected}
+            onAddToCart={AddToCart}
+          />
 
-                {t("Add to Cart")}
-                </span>
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleWishlistToggle}
-            className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors ${
-              isWishlisted
-                ? 'border-red-500 bg-red-50 text-red-600 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-red-400'
-            }`}
-            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-          </button>
+          <ProductWishlist 
+            isWishlisted={isWishlisted}
+            onToggle={handleWishlistToggle}
+          />
         </div>
       </div>
     </div>

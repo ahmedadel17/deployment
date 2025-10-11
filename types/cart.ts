@@ -7,6 +7,7 @@ export interface CartItem extends Omit<Product, 'price_after_discount' | 'thumbn
   qty: number; // alias for components expecting `qty`
   color?: string;
   size?: string;
+  attributes?: { [key: string]: string };
 }
 
 export interface CartData {
@@ -19,6 +20,8 @@ export interface CartData {
     show_currency?: boolean;
   }>;
   amount_to_pay?: string | number;
+  user_balance?: string;
+  use_wallet?: boolean;
   voucher?: {
     code: string;
     message: string;

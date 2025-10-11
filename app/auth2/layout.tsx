@@ -4,6 +4,7 @@ import ThemeInitializer from '@/components/ThemeInitializer'
 function Auth2Layout({children}: {children: React.ReactNode}) {
   return (
       <>
+    
         <ThemeInitializer />
         
         {/* Main content area */}
@@ -21,6 +22,7 @@ function Auth2Layout({children}: {children: React.ReactNode}) {
             {children}
           </div>
         </div>
+
       </>
   )
 }

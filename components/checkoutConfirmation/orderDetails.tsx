@@ -4,7 +4,12 @@ import OrderAttribute from '../cart/orderAttribute'
 import TotalAttribute from '../cart/totalAttribute'
 import { useTranslations } from 'next-intl'
 import ProductItem from './productItem'
-function OrderDetails({orderData}) {
+
+interface OrderDetailsProps {
+  orderData: any;
+}
+
+function OrderDetails({orderData}: OrderDetailsProps) {
   const t = useTranslations();
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">

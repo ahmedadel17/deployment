@@ -1,4 +1,6 @@
 
+import { Product } from '@/types/product';
+
 function Description({product,productWithVariations}: {product: Product,productWithVariations?: Product | null}) {
   return (
     <>

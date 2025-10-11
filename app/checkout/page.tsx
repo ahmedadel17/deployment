@@ -16,14 +16,10 @@ export default function CheckoutPage() {
                
 
                  {/* Shipping Address */}
-                 <ShippingAddress 
-                 
-                 />
+         <ShippingAddress />
+              
 
-                 {/* Shipping Method */}
-                 <ShippingMethod 
-                   
-                 />
+              
 
             </div>
 

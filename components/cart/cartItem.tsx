@@ -1,30 +1,31 @@
 'use client'
 import Image from 'next/image'
 import DeleteButton from '../ui/DeleteButton'
-import { useCart } from '@/context/CartContext'
+import { useCart } from '@/context/Cart'
 import { deleteCartItem } from '@/lib/cartHelpers'
-import tokenGetter from '@/lib/tokenGetter'
+import { useToken } from '@/context/Token'
 import { useLocale } from 'next-intl'
 import postRequest from '@/lib/post'
 import QuantityInput from '../QuantityInput'
 import { useState } from 'react'
 import toastHelper from '@/lib/toastHelper'
 function CartItem({item, idx}: {item: any, idx: number}) {
-  const { cartItems, setCartItems } = useCart();
-  const token = tokenGetter();
+  const { Cart, setCart } = useCart();
+  const { token } = useToken();
+  console.log(token);
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const deleteItem = async (item_id: string) => {
     try {
       
       const response = await deleteCartItem({
-        orderId: (cartItems as { id?: string })?.id || '',
+        orderId: (Cart as { id?: string })?.id || '',
         itemId: item_id,
         token,
         locale
       });
       toastHelper(response.data.status,response.data.message,'Item deleted successfully','Item not deleted');
-      setCartItems(response.data);
+      setCart(response.data);
       localStorage.setItem('cart', JSON.stringify(response.products || []));
     } catch (error) {
       console.error('Failed to delete item:', error);
@@ -35,7 +36,7 @@ function CartItem({item, idx}: {item: any, idx: number}) {
     if (newQuantity < 1) return;
     
     // Only update local state for UI responsiveness
-    setCartItems(prevItems => {
+    setCart(prevItems => {
       if (!prevItems) return prevItems;
       const updatedProducts = [...prevItems.products];
       updatedProducts[index] = { ...updatedProducts[index], qty: newQuantity };
@@ -47,13 +48,13 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
     setIsLoading(true);
     
     const response = await postRequest('/marketplace/cart/update-quantity-cart', {
-      order_id: cartItems?.id,
+      order_id: Cart?.id,
       cart_item_id: item_id,
       qty: newQuantity,
       type: 'product'
     }, {}, token, locale);
     toastHelper(response.data.status,response.data.message);
-    setCartItems(response.data.data);
+    setCart(response.data.data);
   } catch (error) {
     console.error('Failed to update item quantity:', error);
   } finally {

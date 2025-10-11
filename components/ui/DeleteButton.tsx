@@ -18,7 +18,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async (e) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log('Delete button clicked, setting loading to true');

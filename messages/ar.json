@@ -224,5 +224,7 @@
   "Save Address": "حفظ العنوان",
   "Please complete all required fields before placing your order": "يرجى إكمال جميع الحقول المطلوبة قبل تقديم الطلب",
   "Order placed successfully!": "تم تقديم الطلب بنجاح!",
-  "No shipping methods available": "لا توجد طرق شحن متاحة"
+  "No shipping methods available": "لا توجد طرق شحن متاحة",
+  "Proceed to Payment":"الأنتقا إلي الدفع",
+  "Go to Shipping Method":"الأنتقا إلي طريقة الشحن"
 }

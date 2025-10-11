@@ -1,5 +1,5 @@
 'use client'
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import postRequest from '@/lib/post';
 import toastHelper from '@/lib/toastHelper';
 import tokenGetter from '@/lib/tokenGetter';
@@ -7,8 +7,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import React, { useState } from 'react'
 
 function WalletBallanceToggler() {
-  const { cartItems, setCartItems } = useCart();
-  const [useWalletBalance, setUseWalletBalance] = useState(cartItems?.use_wallet);
+  const { Cart, setCart } = useCart();
+  const [useWalletBalance, setUseWalletBalance] = useState(Cart?.use_wallet);
     const [isWalletToggleLoading, setIsWalletToggleLoading] = useState(false);
     const t = useTranslations();
     const token =tokenGetter();
@@ -17,12 +17,12 @@ function WalletBallanceToggler() {
         try {
           setIsWalletToggleLoading(true);
           
-          const response = await postRequest('/marketplace/order/use_wallet/'+cartItems?.id, {
+          const response = await postRequest('/marketplace/order/use_wallet/'+Cart?.id, {
            
           }, {}, token, locale);
           toastHelper(response.data.status,response.data.message);
           // Update cart data with new wallet balance information
-          setCartItems(response.data.data);
+          setCart(response.data.data);
           setUseWalletBalance(checked);
           localStorage.setItem('cart', JSON.stringify(response.data.data || []));
         } catch (error) {
@@ -39,7 +39,7 @@ function WalletBallanceToggler() {
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">{t('Use Wallet Balance')}</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400">                {cartItems?.user_balance}
+                <p className="text-xs text-gray-600 dark:text-gray-400">                {Cart?.user_balance}
                 </p>
               </div>
               <div className="flex items-center">

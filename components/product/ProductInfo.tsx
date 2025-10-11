@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Product } from '@/types/product';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import { CartItem } from '@/types/cart';
 
 interface ProductInfoProps {
@@ -10,7 +10,7 @@ interface ProductInfoProps {
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-  const { cartItems, setCartItems } = useCart();
+  const { Cart, setCart } = useCart();
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
   const [quantity, setQuantity] = useState(1);
@@ -29,7 +29,18 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       color: selectedColor || undefined,
       size: selectedSize || undefined,
     };
-    setCartItems([...cartItems, item]);
+    setCart(prevCart => {
+      if (!prevCart) {
+        return {
+          id: 'temp-cart-id',
+          products: [item]
+        };
+      }
+      return {
+        ...prevCart,
+        products: [...(prevCart.products || []), item]
+      };
+    });
     setTimeout(() => {
       setIsAddingToCart(false);
     }, 1000);

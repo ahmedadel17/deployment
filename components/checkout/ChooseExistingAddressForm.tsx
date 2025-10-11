@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import AddressRadioButton from './AddressRadioButton';
 import getRequest from '@/lib/getter';
-import tokenGetter from '@/lib/tokenGetter';
+import { useToken } from '@/context/Token';
 import postRequest from '@/lib/post';
 import toastHelper from '@/lib/toastHelper';
 import { useOrderState } from '@/context/OrderStateContext';
@@ -32,6 +32,7 @@ const ChooseExistingAddressForm: React.FC<ChooseExistingAddressFormProps> = ({
 }) => {
   const t = useTranslations();
   const locale = useLocale();
+  const { token } = useToken();
   const { orderState, updateUserAddressId } = useOrderState();
   const [existingAddresses, setExistingAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ const ChooseExistingAddressForm: React.FC<ChooseExistingAddressFormProps> = ({
   const getExistingAddresses = useCallback(async() => {
     try {
       setLoading(true);
-      const response = await getRequest('/customer/addresses', {}, locale, tokenGetter())
+      const response = await getRequest('/customer/addresses', {},{}, locale, token || '')
       setExistingAddresses(response.data)
     } catch (error) {
       console.error('Error fetching addresses:', error);
@@ -52,7 +53,7 @@ const ChooseExistingAddressForm: React.FC<ChooseExistingAddressFormProps> = ({
 
   const handleDeleteAddress = useCallback(async (addressId: number) => {
     try {
-      const response = await postRequest(`/customer/delete-address/${addressId}`, {}, {}, tokenGetter(), locale)
+      const response = await postRequest(`/customer/delete-address/${addressId}`, {}, {}, token, locale)
       toastHelper(response.data.status, response.data.message)
       getExistingAddresses()
       onAddressDeleted?.()

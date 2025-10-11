@@ -1,4 +1,6 @@
 
+import { ProductVariation } from '@/types/product';
+
 function Variations({variations, isSelected, isUpdatingVariations, handleVariationSelect}: {variations: ProductVariation[], isSelected: (attributeId: string, value: string) => boolean, isUpdatingVariations: boolean, handleVariationSelect: (attributeId: string, value: string) => void}) {
   return (
     <div>

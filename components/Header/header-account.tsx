@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {useTranslations} from 'next-intl';
 import {useRouter} from "next/navigation";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/context/Cart";
+import { useToken } from "@/context/Token";
 
 type MenuItem = {
   title: string;
@@ -17,7 +18,8 @@ type MenuItem = {
 const HeaderAccount: React.FC = () => {
   const t = useTranslations();
 const router = useRouter();
-const { setCartItems } = useCart();
+const { setCart } = useCart();
+const { isAuthenticated, clearToken } = useToken();
 
   const menuItems: MenuItem[] = [
     {
@@ -86,7 +88,9 @@ const { setCartItems } = useCart();
   };
 
   return (
-    <div className="te-navbar-dropdown" ref={dropdownRef}>
+  <>
+  { isAuthenticated &&
+      <div className="te-navbar-dropdown" ref={dropdownRef} >
       <div
         className="header-account relative flex items-center gap-3 cursor-pointer"
         data-dropdown="account"
@@ -147,8 +151,9 @@ const { setCartItems } = useCart();
                   className={`flex gap-2 items-center px-4 py-2 text-sm rounded-md ${activeClass}`}
                   onClick={() => {
                     if(item.title === 'Logout'){
-                      localStorage.removeItem('token')
-                      setCartItems([])
+                      clearToken();
+                      setCart(null);
+                      router.push('/');
                     }
                     setIsOpen(false)
 
@@ -168,8 +173,9 @@ const { setCartItems } = useCart();
             <button
               className={`flex gap-2 items-center px-4 py-2 text-sm rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700`}
               onClick={() => {
-                localStorage.removeItem('token')
-                setCartItems([])
+                clearToken();
+                setCart(null);
+                router.push('/');
               }}
             >
               <svg
@@ -185,6 +191,8 @@ const { setCartItems } = useCart();
         </div>
       </div>
     </div>
+  }
+  </>
   );
 };
 

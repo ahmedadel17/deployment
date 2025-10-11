@@ -24,8 +24,8 @@ function Rating({product, productWithVariations}: {product: Product, productWith
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-400 ml-2 rtl:ml-0 rtl:mr-2">4.2 (89 {t("reviews")})</span>
                   </div>
-                  {productWithVariations?.out_of_stock && <span className="product-stock text-sm text-red-600 dark:text-red-400">{t("Out of Stock")}</span>}
-                  {!productWithVariations?.out_of_stock && <span className="product-stock text-sm text-green-600 dark:text-green-400">{t("In Stock")}</span>}
+                  {productWithVariations?.stock === '0' && <span className="product-stock text-sm text-red-600 dark:text-red-400">{t("Out of Stock")}</span>}
+                  {productWithVariations?.stock !== '0' && <span className="product-stock text-sm text-green-600 dark:text-green-400">{t("In Stock")}</span>}
                 </div>
   )
 }

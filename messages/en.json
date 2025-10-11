@@ -235,5 +235,7 @@
    "Save Address": "Save Address",
    "Please complete all required fields before placing your order": "Please complete all required fields before placing your order",
    "Order placed successfully!": "Order placed successfully!",
-   "No shipping methods available": "No shipping methods available"
+   "No shipping methods available": "No shipping methods available",
+   "Proceed to Payment":"Proceed to Payment",
+   "Go to Shipping Method":"Go to Shipping Method"
 }

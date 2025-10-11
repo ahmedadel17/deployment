@@ -3,15 +3,15 @@ import React, { useState } from 'react'
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { useTranslations } from 'next-intl';
-import tokenGetter from '@/lib/tokenGetter';
+import { useToken } from '@/context/Token';
 import postRequest from '@/lib/post';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import AppliedPromoCode from './appliedPromoCode';
 import toastHelper from '@/lib/toastHelper';
 function PromoCode() {
     const t = useTranslations();
-    const token = tokenGetter();
-    const {cartItems,setCartItems} =useCart();
+    const { token } = useToken();
+    const {Cart,setCart} =useCart();
     const promoCodeSchema = Yup.object({
         promo_code_id: Yup.string()
           .min(3, 'Promo code must be at least 3 characters')
@@ -30,10 +30,10 @@ function PromoCode() {
         try {
           // Here you would typically make an API call to validate and apply the promo code
           // Get cart ID from the cart data structure
-          const cartId = (cartItems as { id?: string })?.id || (Array.isArray(cartItems) ? cartItems[0]?.id : undefined);
+          const cartId = (Cart as { id?: string })?.id || (Array.isArray(Cart) ? Cart[0]?.id : undefined);
           const response = await postRequest('/marketplace/cart/apply-voucher/'+cartId, { promo_code_id: values.promo_code_id }, {},token);
           toastHelper(response.data.status,response.data.message);
-          setCartItems(response.data.data);
+          setCart(response.data.data);
           resetForm();
         } catch {
           setFieldError('promo_code_id', t('Invalid promo code'));
@@ -44,7 +44,7 @@ function PromoCode() {
       };
   return (
     <div>
-          {!cartItems?.voucher?.code && <Formik
+          {!Cart?.voucher?.code && <Formik
               initialValues={{ promo_code_id: '' }}
               validationSchema={promoCodeSchema}
               onSubmit={handlePromoCodeSubmit}
@@ -79,7 +79,7 @@ function PromoCode() {
                 </Form>
               )}
             </Formik>}
-            {cartItems?.voucher?.code && (
+            {Cart?.voucher?.code && (
          <AppliedPromoCode />
             )}
     </div>

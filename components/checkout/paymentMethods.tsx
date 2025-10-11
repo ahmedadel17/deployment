@@ -1,16 +1,12 @@
 'use client'
-import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import React from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useOrderState } from '@/context/OrderStateContext';
 import HyperPayPayment from '@/components/checkout/hyperpay'
-interface PaymentMethodData {
-  payment_method: string;
-  card_number: string;
-  expiry_date: string;
-  cvv: string;
-  cardholder_name: string;
-}
+import postRequest from '@/lib/post';
+import { useToken } from '@/context/Token';
+import { useCart } from '@/context/Cart';
 
 interface PaymentMethodsProps {
   allowedPaymentMethods?: string[];
@@ -21,34 +17,14 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 }) => {
   const t = useTranslations();
   const { orderState, updatePaymentMethod } = useOrderState();
-  const [cardData, setCardData] = useState<PaymentMethodData>({
-    payment_method: '',
-    card_number: '',
-    expiry_date: '',
-    cvv: '',
-    cardholder_name: ''
-  });
+  const {Cart}=useCart();
+  const { token } = useToken();
+  const locale = useLocale();
 
   const handlePaymentMethodChange = (method: string) => {
     updatePaymentMethod(method);
-    setCardData(prev => ({ ...prev, payment_method: method }));
-    
-    // If it's not a card payment, clear card data
-    if (!['visa', 'master', 'mada'].includes(method)) {
-      setCardData(prev => ({
-        ...prev,
-        card_number: '',
-        expiry_date: '',
-        cvv: '',
-        cardholder_name: ''
-      }));
-    }
   };
 
-  const handleCardDataChange = (field: keyof PaymentMethodData, value: string) => {
-    const newCardData = { ...cardData, [field]: value };
-    setCardData(newCardData);
-  };
 
   const allPaymentOptions = [
     {
@@ -115,6 +91,16 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       )
     }
   ];
+  const tamara=async()=>{
+    const response=await postRequest('/payment/tamara/prepare-checkout', {
+      order_id: Cart?.id,
+    }, {}, token, locale);
+    console.log(response);
+    if(response.data.status){
+
+      
+    }
+  }   
 
   // Filter payment options based on allowed payment methods
   const paymentOptions = allowedPaymentMethods.length > 0 
@@ -164,7 +150,11 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       )}
      {orderState.payment_method!='cod' && orderState.payment_method && <div className='mt-4'>
 
-      <HyperPayPayment />
+{ orderState.payment_method!='cod' && orderState.payment_method=='visa' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
+{ orderState.payment_method!='cod' && orderState.payment_method=='master' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
+{ orderState.payment_method!='cod' && orderState.payment_method=='mada' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
+<button onClick={tamara} className='btn btn-primary'>Tamara</button>
+
       </div>}
     </div>
   );

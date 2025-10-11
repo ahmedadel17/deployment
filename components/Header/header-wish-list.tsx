@@ -1,6 +1,10 @@
+import tokenGetter from "@/lib/tokenGetter"
 
 function HeaderWishList() {
   return (
+      <>
+      {tokenGetter() &&
+      
       <div className="te-navbar-dropdown">
     <a href="wishlist.php" className="header-wishlist relative flex items-center gap-3 cursor-pointer">
         <div className="cart-icon">
@@ -16,6 +20,8 @@ function HeaderWishList() {
         </div>
     </a>
 </div>
+      }
+      </>
   )
 }
 

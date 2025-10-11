@@ -10,10 +10,8 @@ import HeaderMobileMenu from '../header-mobile-menu'
 import LanguageSwitcher from '../LanguageSwitcher'
 import LoginButton from '../login'
 import Link from 'next/link'
-import tokenGetter from '@/lib/tokenGetter'
 
 function style1() {
-  const token = tokenGetter()
   return (
     <nav className="te-navbar whitespace-nowrap mx-auto shadow-sm w-full relative bg-white dark:bg-gray-800" role="navigation" aria-label="Main Navigation">
 
@@ -37,7 +35,7 @@ function style1() {
 
                     {/* <!-- Notification --> */}
                     <LanguageSwitcher />
-                  {!token &&  
+                  {  
                   
                   <>
                   
@@ -47,7 +45,7 @@ function style1() {
                   </>
                   }
                   {
-                    token &&
+                   
                     <>
                     <HeaderWishlist />
                     <HeaderNotification />

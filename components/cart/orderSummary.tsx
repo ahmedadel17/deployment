@@ -1,34 +1,20 @@
 'use client'
 import React, { useState } from 'react'
-import { useLocale, useTranslations } from 'next-intl';
+import {useTranslations } from 'next-intl';
 
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import OrderAttribute from './orderAttribute';
 import WalletBallanceToggler from './walletBalanceToggler';
 import PromoCode from './promoCode';
-import { Check, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import tokenGetter from '@/lib/tokenGetter';
-import postRequest from '@/lib/post';
 import TotalAttribute from './totalAttribute';
 // Validation schema for promo code
 
 
 function OrderSummary() {
-    const { cartItems } = useCart();
+    const { Cart } = useCart();
     const t = useTranslations();
     const [isOrderSummaryExpanded, setIsOrderSummaryExpanded] = useState(true);
-    const token= tokenGetter();
-    const locale = useLocale();
-    const convertCartToOrder = async () => {
-      try {
-        const response = await postRequest('/order/orders/change-cart-to-order/'+cartItems?.id, {
-        }, {}, token, locale);
-      } catch (error) {
-        console.error('Failed to convert cart to order:', error);
-      }
-    }   
-    // Get token safely (handles SSR)
     
  
   return (
@@ -59,22 +45,21 @@ function OrderSummary() {
      
           </div>
 
-         {cartItems?.user_balance!='0.00' && <WalletBallanceToggler />}
+         {Cart?.user_balance!='0.00' && <WalletBallanceToggler />}
 
           <div className="space-y-3 mb-6">
            
           {
-            cartItems?.order_attributes?.map((item, idx) => (
+            Cart?.order_attributes?.map((item, idx) => (
               <OrderAttribute key={idx} t={t} {...item} />
             ))
           } 
-          <TotalAttribute value={cartItems?.amount_to_pay} label={t('Total')} />
+          <TotalAttribute value={Cart?.amount_to_pay} label={t('Total')} />
             
           </div>
 
-          <button onClick={convertCartToOrder} className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</button>
           <Link href="/checkout" className="w-full py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium mb-3 text-center block">{t('Proceed to Checkout')}</Link>
-          <a href="#" className="w-full py-3 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium mb-4 text-center block">{t('PayPal Express Checkout')}</a>
+          {/* <a href="#" className="w-full py-3 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500 transition-colors font-medium mb-4 text-center block">{t('PayPal Express Checkout')}</a> */}
 
           <div className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,14 +68,14 @@ function OrderSummary() {
             {t('Secure checkout guaranteed')}
           </div>
 
-          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+          {/* <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
               <span className="text-sm text-green-700 dark:text-green-300">{t('You qualify for free shipping')}</span>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </div>

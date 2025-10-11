@@ -1,4 +1,5 @@
 import React from 'react'
+import { Product } from '@/types/product';
 
 function ProductMeta({product,productWithVariations}: {product: Product,productWithVariations?: Product | null}) {
   return (

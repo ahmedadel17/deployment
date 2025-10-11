@@ -6,7 +6,7 @@ import ProductVariations from './ProductVariations';
 import { Product, ProductVariation } from '@/types/product';
 import { useTranslations } from 'next-intl';
 import { Formik, Form } from 'formik';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import postRequest from '@/lib/post';
 import QuantityInput from '@/components/QuantityInput';
 import Rating from './rating';
@@ -33,7 +33,7 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariations>({});
   const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { cartItems, setCartItems } = useCart();
+  const { Cart, setCart } = useCart();
   const t = useTranslations();
 
   const handleVariationChange = (variations: SelectedVariations) => {
@@ -49,12 +49,12 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
     setIsLoading(true);
     try {
       const token = JSON.parse(localStorage.getItem('token') || 'null');
-      const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product.default_variation_id, type: 'product' }, 
+      const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product.id, type: 'product' }, 
         { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
      toastHelper(response.data.status,response.data.message);
       // Add products from response to cart context
       if (response.data.data.products && Array.isArray(response.data.data.products)) {
-        setCartItems(prevItems => {
+        setCart(prevItems => {
           // Update localStorage immediately
           localStorage.setItem('cart', JSON.stringify(response.data.data));
           return response.data.data;

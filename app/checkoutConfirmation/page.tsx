@@ -1,7 +1,7 @@
 'use client'
 import getRequest from "@/lib/getter";
-import tokenGetter from "@/lib/tokenGetter";
-import { useCart } from "@/context/CartContext";
+import { useToken } from "@/context/Token";
+import { useCart } from "@/context/Cart";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import SuccessHeader from "@/components/checkoutConfirmation/successHeader";
@@ -11,13 +11,29 @@ import NextSteps from "@/components/checkoutConfirmation/nextSteps";
 import ActionButtons from "@/components/checkoutConfirmation/actionButtons";
 import { useSearchParams } from "next/navigation";
  function Confirmation() {
+  const { setCart } = useCart();
+    const { token } = useToken();
     const locale = useLocale();
     const [orderData, setOrderData] = useState<any>(null);
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
+    const paymentId=searchParams.get('id');
+    console.log(paymentId);
+
     const getOrderData = async () => {
-        const orderData=  await getRequest(`/order/orders/${orderId}`,{},locale,tokenGetter());
+        if (!token) {
+            console.error('No token available');
+            return;
+        }
+        
+        const orderData=  await getRequest(`/order/orders/${orderId}`,{},{},locale,token);
+
         setOrderData(orderData);
+        if(paymentId){
+            const paymentData=  await getRequest(`/payment/hyper-pay/check-status`,{},{id:String(paymentId)},locale,token);
+            console.log(paymentData);
+        }
+        setCart(null);
     }
     useEffect(() => {
         getOrderData();

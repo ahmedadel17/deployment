@@ -1,23 +1,23 @@
 
 import React, { useState } from 'react'
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/context/Cart';
 import { CheckCircle2, X } from 'lucide-react';
 import postRequest from '@/lib/post';
-import tokenGetter from '@/lib/tokenGetter';
+import { useToken } from '@/context/Token';
 import toastHelper from '@/lib/toastHelper';
 function AppliedPromoCode() {
-  const { cartItems,setCartItems } = useCart();
-  const token = tokenGetter();
+  const { Cart,setCart } = useCart();
+  const { token } = useToken();
   const [isRemovingPromo, setIsRemovingPromo] = useState(false);
   
   const removePromoCode = async () => {
     setIsRemovingPromo(true);
     try {
       // Get cart ID from the cart data structure
-      const cartId = (cartItems as { id?: string })?.id || (Array.isArray(cartItems) ? cartItems[0]?.id : undefined);
+      const cartId = (Cart as { id?: string })?.id || (Array.isArray(Cart) ? Cart[0]?.id : undefined);
       const response = await postRequest('/marketplace/cart/delete-voucher/'+cartId, {}, {}, token);
       toastHelper(response.data.status,response.data.message);
-      setCartItems(response.data.data);
+      setCart(response.data.data);
     } catch (error) {
       console.error('Failed to remove promo code:', error);
     } finally {
@@ -32,12 +32,12 @@ function AppliedPromoCode() {
                 <div className='flex gap-2'>
 
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1 text-capitalize ">
-                    {(cartItems as { voucher?: { code?: string } })?.voucher?.code}
+                    {(Cart as { voucher?: { code?: string } })?.voucher?.code}
                 </h3>
                 <CheckCircle2 className="w-4 h-4 text-green-500 mt-1" />
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {(cartItems as { voucher?: { message?: string } })?.voucher?.message}
+                    {(Cart as { voucher?: { message?: string } })?.voucher?.message}
                 </p>
               </div>
               <div className="flex items-center">

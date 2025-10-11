@@ -1,7 +1,7 @@
 
 'use client'
 import React, { useEffect, useState } from 'react'
-import { useCart } from '@/context/CartContext'
+import { useCart } from '@/context/Cart'
 import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
 import getRequest from '@/lib/getter'
@@ -10,25 +10,26 @@ import EmptyCart from '../emptyCart'
 import CartItem from '../cartItem'
 import tokenGetter from '@/lib/tokenGetter'
 import postRequest from '@/lib/post'
+import { useToken } from '@/context/Token'
 
 
 export default function CartStyle1() {
-  const { cartItems, setCartItems } = useCart();
+  const { Cart, setCart } = useCart();
   const t = useTranslations();
   const locale = useLocale();
-  const token = tokenGetter();
   const [isLoading, setIsLoading] = useState(true);
+  const { token } = useToken();
   // Load cart data from API
   useEffect(() => {
     const loadCartData = async () => {
       try {
         setIsLoading(true);
-        const token = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('token') || 'null') : null;
-        
+
+
         const data = await getRequest('/marketplace/cart/my-cart', {
           'Accept-Language': locale,
-        }, locale, token);
-        setCartItems(data.data);
+        }, {}, locale, token);
+        setCart(data.data);
       } catch (error) {
         console.error('Failed to load cart data:', error);
       } finally {
@@ -37,7 +38,7 @@ export default function CartStyle1() {
     };
 
     loadCartData();
-  }, [locale, setCartItems]);
+  }, [locale, setCart]);
   
 
 
@@ -67,10 +68,10 @@ export default function CartStyle1() {
                 <p className="text-gray-600 dark:text-gray-400">Loading cart...</p>
               </div>
             </div>
-          ) : !cartItems?.products || cartItems.products.length === 0 ? (
+          ) : !Cart?.products || Cart.products.length === 0 ? (
             <EmptyCart />
           ) : (
-            cartItems.products.map((item, idx: number) => (
+            Cart.products.map((item, idx: number) => (
             <CartItem item={item} idx={idx} key={idx} />
             ))
           )}
@@ -85,7 +86,7 @@ export default function CartStyle1() {
             </div>
           </div>
           {
-            cartItems?.products && cartItems.products.length > 0 && <OrderSummary />
+            Cart?.products && Cart.products.length > 0 && <OrderSummary />
           }
 
         
