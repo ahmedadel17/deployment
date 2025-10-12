@@ -7,11 +7,11 @@ function Description({product,productWithVariations}: {product: Product,productW
     {/* Product Description */}
     <div className="product-desc">
    {!productWithVariations && <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
-      {product.description || "Experience ultimate comfort with our premium product. Made from high-quality materials with excellent craftsmanship that ensures durability and style."}
+      {product?.description || "Experience ultimate comfort with our premium product. Made from high-quality materials with excellent craftsmanship that ensures durability and style."}
     </p>}
     {productWithVariations && (
       <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
-        {productWithVariations.description || "Experience ultimate comfort with our premium product. Made from high-quality materials with excellent craftsmanship that ensures durability and style."}
+        {productWithVariations?.description || "Experience ultimate comfort with our premium product. Made from high-quality materials with excellent craftsmanship that ensures durability and style."}
       </p>
     )}
   </div>

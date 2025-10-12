@@ -88,7 +88,7 @@ const HeaderCart: React.FC = () => {
        </div>
 
        {/* Cart Items */}
-        <DropDownCartItem  items={Cart?.products || []} />
+        <DropDownCartItem  />
 
        {/* Cart Total */}
        {

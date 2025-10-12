@@ -6,14 +6,14 @@ function Price({product,productWithVariations,isUpdatingVariations}: {product: P
     <>
     {/* Price */}
     <div className="product-price flex items-baseline gap-2">
-{!productWithVariations && product.variations && product.variations.length > 0 && <span className="text-3xl font-bold text-secondary-600">
+{!productWithVariations && product?.variations && product?.variations.length > 0 && <span className="text-3xl font-bold text-secondary-600">
     <span className="icon-riyal-symbol"></span>
     <span>{product.min_price}</span>
 </span>}
-    {product.old_price && (
+    {product?.old_price && (
       <span className="text-lg text-gray-500 dark:text-gray-400 line-through">
         <span className="icon-riyal-symbol"></span>
-        <span>{product.old_price}</span>
+        <span>{product?.old_price}</span>
       </span>
     )}
            {isUpdatingVariations && (

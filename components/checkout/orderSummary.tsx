@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {useLocale, useTranslations} from 'next-intl'
 import { useCart } from '@/context/Cart';
 import { useOrderState } from '@/context/OrderStateContext';
@@ -13,7 +13,7 @@ import { CartItem } from '@/types/cart';
 function OrderSummary() {
   const { Cart, setCart } = useCart();
   const { token } = useToken();
-  const { orderState, goToPayment, getOrderPayload, updateShippingRates } = useOrderState();
+  const { orderState, goToPayment, getOrderPayload, updateShippingRates,updateOrderStatus} = useOrderState();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
@@ -24,6 +24,7 @@ function OrderSummary() {
 
     const payload = getOrderPayload();
     const response = await postRequest(`/marketplace/cart/cart-details/${Cart?.id}`, payload, {}, token, locale);
+    updateOrderStatus('payment');
     setCart(response.data.data);
     toastHelper(response.data.status,response.data.message);
     if(response.data.status){
@@ -44,6 +45,7 @@ function OrderSummary() {
       order_id: Cart?.id,
       products: productVariations
     }, {}, token, locale);
+        updateOrderStatus('shipping');
     
     console.log(response.data.data.shipping_methods);
     // Save shipping rates to order context
@@ -91,6 +93,10 @@ function OrderSummary() {
       cart_id: Cart?.id,
     }, {}, token, locale);
     router.push(`/checkoutConfirmation?orderId=${response.data.data.id}`);
+  }
+  const handleReturnToCheckout = () => {
+    updateOrderStatus('address');
+    router.push('/checkout');
   }
   return (
     <div className="lg:col-span-1">
@@ -174,17 +180,17 @@ function OrderSummary() {
       )}
 
       {/* 2. Go to Shipping Method - Hide if shipping address selected and not on shipping method page */}
-      { !isOnShippingMethodPage() && !isOnPaymentPage() ? (
+      {  orderState.order_status=='address' && (
         <button
           onClick={goToShippingMethod}
           className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {t('Go to Shipping Method')}
         </button>
-      ) : null}
+      )}
 
       {/* 3. Proceed to Payment - Show if payment method not selected and not on payment page */}
-      {orderState?.user_address_id &&!isPaymentMethodSelected() && !isOnPaymentPage() && (
+      {orderState.order_status=='shipping' && (
         <button
           onClick={handlePlaceOrder}
           className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -196,7 +202,7 @@ function OrderSummary() {
       {/* 4. Return to Checkout - Show on payment page */}
       {isOnPaymentPage() && (
         <button
-          onClick={router.back}
+          onClick={handleReturnToCheckout}
           className="w-full mt-6 py-3 flex items-center justify-center bg-primary-400 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           <span>{t('Return to Checkout')}</span>
@@ -204,7 +210,7 @@ function OrderSummary() {
       )}
 
       {/* 5. Place Order for COD - Show if payment method is COD and not zero amount */}
-      {orderState.payment_method === 'cod' && !isAmountZero() && (
+      {orderState.order_status=='payment' && (
         <button
           onClick={handlePayment}
           className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"

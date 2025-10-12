@@ -1,6 +1,6 @@
 import React from 'react'
-import ProductPageClient from '@/components/product/ProductPageClient'
-import ProductTabs from '@/components/product/ProductTabs'
+import ProductPageClient from '@/components/product/productDetails/ProductPageClient'
+import ProductTabs from '@/components/product/productDetails/ProductTabs'
 import getRequest from '@/lib/getter'
 import { getLocale } from 'next-intl/server'
 
@@ -14,7 +14,7 @@ async function Page({ params }: PageProps) {
   const { id } = await params;
 
   const locale = await getLocale();
-  const productData= await getRequest(`/catalog/products/details/${id}`,{},{},locale,null);
+  const productData= await getRequest(`/catalog/products/details-by-slug/${id}`,{},{},locale,null);
   
   const product = productData.data;
  
@@ -27,7 +27,7 @@ async function Page({ params }: PageProps) {
 {/* Product Gallery and Variations */}
   <ProductPageClient 
     product={product} 
-    variations={product.variations || []} 
+    variations={product?.variations || []} 
   />
 
 {/* <!-- Grid --> */}

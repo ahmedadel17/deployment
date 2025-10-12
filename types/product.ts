@@ -4,6 +4,7 @@ export interface Product {
   hover?: string;
   title: string;
   name?: string; // API field
+  slug: string; // URL-friendly identifier
   price: string | number;
   price_after_discount?: string | number; // API field
   min_price?: string | number; // API field
@@ -24,7 +25,7 @@ export interface Product {
   features?: string[];
   specifications?: Record<string, string>;
   images?: string[];
-  gallery?: Array<{ url: string; alt?: string }> | string[];
+  gallery?: Array<{ url: string; original_url?: string; alt?: string }> | string[];
   variants?: ProductVariant[];
   variations?: ProductVariation[];
   price_befor_discount?: string | number;

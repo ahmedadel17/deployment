@@ -8,8 +8,6 @@ import getRequest from '@/lib/getter'
 import OrderSummary from '../orderSummary'
 import EmptyCart from '../emptyCart'
 import CartItem from '../cartItem'
-import tokenGetter from '@/lib/tokenGetter'
-import postRequest from '@/lib/post'
 import { useToken } from '@/context/Token'
 
 
@@ -18,27 +16,38 @@ export default function CartStyle1() {
   const t = useTranslations();
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(true);
-  const { token } = useToken();
+  const { token, isInitialized } = useToken();
+  
   // Load cart data from API
   useEffect(() => {
     const loadCartData = async () => {
       try {
         setIsLoading(true);
-
-
+        console.log('token', token);
+        console.log('isInitialized', isInitialized);
+        
         const data = await getRequest('/marketplace/cart/my-cart', {
-          'Accept-Language': locale,
+       
         }, {}, locale, token);
         setCart(data.data);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Failed to load cart data:', error);
+        // If unauthorized, show empty cart or redirect to login
+        if (error && typeof error === 'object' && 'response' in error && 
+            (error as { response?: { status?: number } }).response?.status === 401) {
+          console.log('User not authenticated, showing empty cart');
+          setCart({ id: '', products: [] });
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadCartData();
-  }, [locale, setCart]);
+    // Only load cart data when token context is initialized
+    if (isInitialized) {
+      loadCartData();
+    }
+  }, [locale, setCart, token, isInitialized]);
   
 
 

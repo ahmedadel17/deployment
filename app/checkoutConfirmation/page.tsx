@@ -21,16 +21,13 @@ import { useSearchParams } from "next/navigation";
     console.log(paymentId);
 
     const getOrderData = async () => {
-        if (!token) {
-            console.error('No token available');
-            return;
-        }
+      
         
-        const orderData=  await getRequest(`/order/orders/${orderId}`,{},{},locale,token);
+        // const orderData=  await getRequest(`/order/orders/${orderId}`,{},{},locale,token);
 
-        setOrderData(orderData);
+        // setOrderData(orderData);
         if(paymentId){
-            const paymentData=  await getRequest(`/payment/hyper-pay/check-status`,{},{id:String(paymentId)},locale,token);
+            const paymentData=  await getRequest(`/payment/hyper-pay/check-status`,{},{id:String(paymentId)},locale,null);
             console.log(paymentData);
         }
         setCart(null);
@@ -46,17 +43,17 @@ import { useSearchParams } from "next/navigation";
 <SuccessHeader />
 
 {/* <!-- Order Details --> */}
-<OrderDetails orderData={orderData}/>
+{/* <OrderDetails orderData={orderData}/> */}
 
 {/* <!-- Shipping & Contact Info --> */}
-<ShippingInfo address={orderData?.data?.address} />
+{/* <ShippingInfo address={orderData?.data?.address} /> */}
 
 {/* <!-- Next Steps --> */}
 {/* <NextSteps /> */}
 
 {/* <!-- Action Buttons --> */}
 
-<ActionButtons/>
+{/* <ActionButtons/> */}
 {/* <!-- Email Confirmation Notice --> */}
 {/* <EmailConfirmation /> */}
 

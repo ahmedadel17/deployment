@@ -14,14 +14,14 @@ export default function ProductTabs({ product }: ProductTabsProps) {
     {
       id: 'description',
       label: 'Description',
-      content: product.description || product.short_description || 'No description available for this product.'
+      content: product?.description || product?.short_description || 'No description available for this product.'
     },
     {
       id: 'specifications',
       label: 'Specifications',
-      content: product.specifications ? (
+      content: product?.specifications ? (
         <div className="space-y-3">
-          {Object.entries(product.specifications).map(([key, value]) => (
+          {Object.entries(product?.specifications).map(([key, value]) => (
             <div key={key} className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
               <span className="font-medium text-gray-900 dark:text-white">{key}:</span>
               <span className="text-gray-600 dark:text-gray-400">{value}</span>
@@ -38,14 +38,14 @@ export default function ProductTabs({ product }: ProductTabsProps) {
           <div className="flex items-center space-x-4">
             <div className="text-center">
               <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                {product.rating || 4.2}
+                {product?.rating || 4.2}
               </div>
               <div className="flex items-center justify-center space-x-1 mt-1">
                 {[...Array(5)].map((_, i) => (
                   <svg
                     key={i}
                     className={`w-4 h-4 ${
-                      i < Math.floor(product.rating || 4.2)
+                      i < Math.floor(product?.rating || 4.2)
                         ? 'text-yellow-400 fill-current'
                         : 'text-gray-300 fill-current'
                     }`}
@@ -56,7 +56,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
                 ))}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Based on {product.reviews || 89} reviews
+                Based on {product?.reviews || 89} reviews
               </div>
             </div>
           </div>

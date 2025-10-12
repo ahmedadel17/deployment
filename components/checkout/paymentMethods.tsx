@@ -150,10 +150,8 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       )}
      {orderState.payment_method!='cod' && orderState.payment_method && <div className='mt-4'>
 
-{ orderState.payment_method!='cod' && orderState.payment_method=='visa' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
-{ orderState.payment_method!='cod' && orderState.payment_method=='master' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
-{ orderState.payment_method!='cod' && orderState.payment_method=='mada' && <HyperPayPayment selectedBrand={orderState.payment_method} />}
-<button onClick={tamara} className='btn btn-primary'>Tamara</button>
+{  <HyperPayPayment selectedBrand={orderState.payment_method} />}
+
 
       </div>}
     </div>

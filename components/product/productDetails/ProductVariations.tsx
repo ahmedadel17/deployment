@@ -10,13 +10,12 @@ import QuantityInput from '@/components/QuantityInput';
 import TextArea from '@/components/ui/TextArea';
 import AddToCartButton from '@/components/ui/AddToCartButton';
 import ActionButton from '@/components/ui/ActionButton';
-import Rating from './rating';
-import Name from './name';
+import Rating from '../rating';
+import Name from '../name';
 import Price from './price';
-import Variations from './variations';
+import Variations from '../variations';
 import Description from './description';
-import ProductMeta from './productMeta';
-import toast from 'react-hot-toast';
+import ProductMeta from '../productMeta';
 import toastHelper from '@/lib/toastHelper';
 
 interface ProductVariationsProps {
@@ -24,20 +23,21 @@ interface ProductVariationsProps {
   onSelectionChange?: (selectedVariations: SelectedVariations) => void;
   onVariationChange?: (selectedVariations: SelectedVariations) => void;
   product: Product;
+  productWithVariations?: Product | null;
   onProductWithVariationsChange?: (product: Product | null) => void;
+  onUpdatingVariationsChange?: (updating: boolean) => void;
 }
 
 interface SelectedVariations {
   [attributeId: string]: string;
 }
 
-export default function ProductVariations({ variations, onSelectionChange, onVariationChange, product, onProductWithVariationsChange }: ProductVariationsProps) {
+export default function ProductVariations({ variations, onSelectionChange, onVariationChange, product, productWithVariations, onProductWithVariationsChange, onUpdatingVariationsChange }: ProductVariationsProps) {
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariations>({});
   const [isUpdatingVariations, setIsUpdatingVariations] = useState(false);
-  const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedVariations, setHasLoadedVariations] = useState(false);
-  const { Cart, setCart } = useCart();
+  const { setCart } = useCart();
   const locale = useLocale();
   const t = useTranslations();
   // Handle form submission
@@ -60,7 +60,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
         toastHelper(response.data.status,response.data.message);
       // Add products from response to cart context
       if (response.data.data.products && Array.isArray(response.data.data.products)) {
-        setCart(prevItems => {
+        setCart(() => {
           // Update localStorage immediately
           localStorage.setItem('cart', JSON.stringify(response.data.data));
           return response.data.data;
@@ -96,20 +96,24 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
       
       if (!hasLoadedVariations || selectionChanged) {
         setIsUpdatingVariations(true);
+        onUpdatingVariationsChange?.(true);
         try {
+          console.log('ProductVariations - Fetching variation data for:', newSelection);
           const variationData = await getProductByVariations(newSelection);
-          console.log('Variation data loaded:', variationData);
+          console.log('ProductVariations - Variation data loaded:', variationData);
+          console.log('ProductVariations - Gallery in variation data:', variationData?.gallery);
           setHasLoadedVariations(true);
           onProductWithVariationsChange?.(variationData);
+          console.log('ProductVariations - Called onProductWithVariationsChange with:', variationData);
         } catch (error) {
           console.error('Failed to load product variations:', error);
         } finally {
           setIsUpdatingVariations(false);
+          onUpdatingVariationsChange?.(false);
         }
       }
     } else {
       // Not all selected, clear any previously loaded variation-specific product and reset flag
-      setProductWithVariations(null);
       setHasLoadedVariations(false);
       onProductWithVariationsChange?.(null);
     }
@@ -136,7 +140,6 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
       const response = await
        postRequest('/catalog/products/get-variation-by-attribute', requestBody, { 'Content-Type': 'application/json' },null,locale);
      console.log(response);
-      setProductWithVariations(response.data.data);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching product variations:', error);

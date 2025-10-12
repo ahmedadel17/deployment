@@ -13,6 +13,9 @@ interface ShippingRate {
   name: string;
   cost: number;
   estimated_days: string;
+  slug: string;
+  price: string | number;
+  image: string;
   [key: string]: string | number | boolean;
 }
 

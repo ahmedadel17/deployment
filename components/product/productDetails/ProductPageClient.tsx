@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductGallery from './ProductGallery';
 import ProductVariations from './ProductVariations';
 import { Product, ProductVariation } from '@/types/product';
@@ -9,15 +9,14 @@ import { Formik, Form } from 'formik';
 import { useCart } from '@/context/Cart';
 import postRequest from '@/lib/post';
 import QuantityInput from '@/components/QuantityInput';
-import Rating from './rating';
+import Rating from '../rating';
 import Price from './price';
 import Description from './description';
-import Name from './name';
-import TextArea from '../ui/TextArea';
-import AddToCartButton from '../ui/AddToCartButton';
-import ActionButton from '../ui/ActionButton';
-import ProductMeta from './productMeta';
-import toast from 'react-hot-toast';
+import Name from '../name';
+import TextArea from '../../ui/TextArea';
+import AddToCartButton from '../../ui/AddToCartButton';
+import ActionButton from '../../ui/ActionButton';
+import ProductMeta from '../productMeta';
 import toastHelper from '@/lib/toastHelper';
 
 interface ProductPageClientProps {
@@ -33,7 +32,8 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariations>({});
   const [productWithVariations, setProductWithVariations] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { Cart, setCart } = useCart();
+  const [isUpdatingVariations, setIsUpdatingVariations] = useState(false);
+  const { setCart } = useCart();
   const t = useTranslations();
 
   const handleVariationChange = (variations: SelectedVariations) => {
@@ -41,20 +41,30 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
   };
 
   const handleProductWithVariationsChange = (product: Product | null) => {
+    console.log('ProductPageClient - handleProductWithVariationsChange called with:', product);
     setProductWithVariations(product);
   };
+
+  const handleUpdatingVariationsChange = (updating: boolean) => {
+    setIsUpdatingVariations(updating);
+  };
+
+  // Debug: Track productWithVariations changes
+  useEffect(() => {
+    console.log('ProductPageClient - productWithVariations changed:', productWithVariations);
+  }, [productWithVariations]);
 
   // Handle form submission for products without variations
   const handleAddToCart = async (values: { qty: number; customer_note: string }) => {
     setIsLoading(true);
     try {
       const token = JSON.parse(localStorage.getItem('token') || 'null');
-      const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product.id, type: 'product' }, 
+      const response = await postRequest('/marketplace/cart/add-to-cart', { ...values, item_id: product?.id, type: 'product' }, 
         { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },token);
      toastHelper(response.data.status,response.data.message);
       // Add products from response to cart context
       if (response.data.data.products && Array.isArray(response.data.data.products)) {
-        setCart(prevItems => {
+        setCart(() => {
           // Update localStorage immediately
           localStorage.setItem('cart', JSON.stringify(response.data.data));
           return response.data.data;
@@ -76,9 +86,10 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
       <div>
         <div className="sticky top-8 space-y-6">
           <ProductGallery 
-            product={product} 
+            product={product as Product} 
             selectedVariations={selectedVariations}
             productWithVariations={productWithVariations}
+            isUpdatingVariations={isUpdatingVariations}
           />
         </div>
       </div>
@@ -90,9 +101,11 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
           {variations && variations.length > 0 ? (
             <ProductVariations 
               variations={variations} 
-              product={product}
+              product={product as Product}
+              productWithVariations={productWithVariations}
               onVariationChange={handleVariationChange}
               onProductWithVariationsChange={handleProductWithVariationsChange}
+              onUpdatingVariationsChange={handleUpdatingVariationsChange}
             />
           ) : (
             /* Product without variations */
@@ -104,7 +117,7 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
                 <Form >
               {/* Product Title and Rating */}
               <div>
-                <Name product={product} />
+                <Name product={product as Product} />
                <Rating product={product} />
               </div>
 
@@ -120,8 +133,8 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
                   onChange={(newValue) => setFieldValue('qty', newValue)}
                   min={1}
                   max={10}
-                  showStockInfo={!!product.stock}
-                  stock={product.stock}
+                  showStockInfo={!!product?.stock}
+                  stock={product?.stock}
                   stockLabel={t("Only")}
                 />
               </div>

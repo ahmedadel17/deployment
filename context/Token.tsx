@@ -34,15 +34,19 @@ export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // Save token to localStorage whenever it changes
+  // Save token to localStorage and cookies whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (token) {
         localStorage.setItem('token', JSON.stringify(token));
-        console.log('Token saved to localStorage:', token);
+        // Also save to cookies for server-side access
+        document.cookie = `auth_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+        console.log('Token saved to localStorage and cookies:', token);
       } else {
         localStorage.removeItem('token');
-        console.log('Token removed from localStorage');
+        // Remove from cookies
+        document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        console.log('Token removed from localStorage and cookies');
       }
     }
   }, [token]);

@@ -1,11 +1,22 @@
 import { Product } from '@/types/product';
 
+// Helper function to generate slug from title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
 export const products: Product[] = [
   {
     id: 1,
     image: '/assets/images/product-1.jpg',
     hover: '/assets/images/product-1-flip.jpg',
     title: 'Embroidered crew neck T-shirt',
+    slug: 'embroidered-crew-neck-t-shirt',
     price: '720.00',
     old_price: '850.00',
     colors: ['blue', 'black', 'gray'],
@@ -28,6 +39,7 @@ export const products: Product[] = [
     image: '/assets/images/product-2.jpg',
     hover: '/assets/images/product-2-flip.jpg',
     title: 'Cute short-sleeved T-shirt with brand logo',
+    slug: 'cute-short-sleeved-t-shirt-with-brand-logo',
     price: '150.00',
     old_price: null,
     colors: ['white', 'green', 'orange'],
@@ -49,6 +61,7 @@ export const products: Product[] = [
     id: 3,
     image: '/assets/images/product-3.jpg',
     title: 'Long-sleeved shirt with brand logo embroidery',
+    slug: 'long-sleeved-shirt-with-brand-logo-embroidery',
     price: '450.00',
     old_price: null,
     colors: ['red', 'blue', 'white'],
@@ -69,6 +82,7 @@ export const products: Product[] = [
     id: 4,
     image: '/assets/images/product-4.jpg',
     title: 'Straight-leg jeans',
+    slug: 'straight-leg-jeans',
     price: '1,200.00',
     colors: ['brown', 'orange'],
     sizes: ['M', 'L'],
@@ -89,6 +103,7 @@ export const products: Product[] = [
     image: '/assets/images/product-6.jpg',
     hover: '/assets/images/product-6-2.jpg',
     title: 'Mercer 7 Inch Chino Shorts',
+    slug: 'mercer-7-inch-chino-shorts',
     price: '200.00',
     old_price: '300.00',
     colors: ['brown', 'orange'],
@@ -114,6 +129,7 @@ export const products: Product[] = [
     image: '/assets/images/425-1044mn001-4_ivory_2.jpg',
     hover: '/assets/images/425-1044mn001-4_ivory_4.jpg',
     title: 'Plain pants with a drawstring waist',
+    slug: 'plain-pants-with-a-drawstring-waist',
     price: '100.00',
     colors: ['white', 'black'],
     sizes: ['SX', 'S', 'M', 'L', 'XL'],
@@ -132,6 +148,7 @@ export const products: Product[] = [
     image: '/assets/images/product-7.jpg',
     hover: '/assets/images/product-7-flip.jpg',
     title: 'Floral Print Summer Dress',
+    slug: 'floral-print-summer-dress',
     price: '890.00',
     old_price: '1200.00',
     colors: ['pink', 'white', 'yellow'],
@@ -154,6 +171,7 @@ export const products: Product[] = [
     image: '/assets/images/product-8.jpg',
     hover: '/assets/images/product-8-flip.jpg',
     title: 'High-Waisted Skinny Jeans',
+    slug: 'high-waisted-skinny-jeans',
     price: '650.00',
     old_price: null,
     colors: ['blue', 'black', 'white'],
@@ -176,6 +194,7 @@ export const products: Product[] = [
     image: '/assets/images/product-9.jpg',
     hover: '/assets/images/product-9-flip.jpg',
     title: 'Silk Blouse with Bow Tie',
+    slug: 'silk-blouse-with-bow-tie',
     price: '1150.00',
     old_price: '1400.00',
     colors: ['cream', 'black', 'navy'],
@@ -198,6 +217,7 @@ export const products: Product[] = [
     image: '/assets/images/product-10.jpg',
     hover: '/assets/images/product-10-flip.jpg',
     title: 'Knitted Cardigan Sweater',
+    slug: 'knitted-cardigan-sweater',
     price: '780.00',
     old_price: null,
     colors: ['beige', 'gray', 'burgundy'],
@@ -220,6 +240,7 @@ export const products: Product[] = [
     image: '/assets/images/product-17.jpg',
     hover: '/assets/images/product-17-flip.jpg',
     title: 'Rainbow Unicorn T-Shirt',
+    slug: 'rainbow-unicorn-t-shirt',
     price: '180.00',
     old_price: '220.00',
     colors: ['pink', 'purple', 'white'],
@@ -242,6 +263,7 @@ export const products: Product[] = [
     image: '/assets/images/product-18.jpg',
     hover: '/assets/images/product-18-flip.jpg',
     title: 'Dinosaur Print Hoodie',
+    slug: 'dinosaur-print-hoodie',
     price: '280.00',
     old_price: null,
     colors: ['green', 'blue', 'gray'],
@@ -264,6 +286,7 @@ export const products: Product[] = [
     image: '/assets/images/product-19.jpg',
     hover: '/assets/images/product-19-flip.jpg',
     title: 'Tutu Dress with Sparkles',
+    slug: 'tutu-dress-with-sparkles',
     price: '350.00',
     old_price: '450.00',
     colors: ['pink', 'purple', 'gold'],
@@ -286,6 +309,7 @@ export const products: Product[] = [
     image: '/assets/images/product-20.jpg',
     hover: '/assets/images/product-20-flip.jpg',
     title: 'Superhero Cape Set',
+    slug: 'superhero-cape-set',
     price: '320.00',
     old_price: null,
     colors: ['red', 'blue', 'black'],
@@ -308,6 +332,7 @@ export const products: Product[] = [
     image: '/assets/images/product-21.jpg',
     hover: '/assets/images/product-21-flip.jpg',
     title: 'Striped Overalls',
+    slug: 'striped-overalls',
     price: '420.00',
     old_price: '500.00',
     colors: ['denim', 'white', 'pink'],

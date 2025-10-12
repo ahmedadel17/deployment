@@ -10,12 +10,12 @@ interface ProductInfoProps {
 function ProductInfo({ product, getCurrentProduct }: ProductInfoProps) {
   return (
     <div className="flex-1">
-      <Link href={`/products/${getCurrentProduct().id}`}>
+      <Link href={`/products/${getCurrentProduct().slug}`}>
         <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
           {getCurrentProduct()?.name}
         </h3>
       </Link>
-      <Link href={`/products/${getCurrentProduct().id}`}>
+      <Link href={`/products/${getCurrentProduct().slug}`}>
         <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
           {getCurrentProduct()?.short_description}
         </h4>

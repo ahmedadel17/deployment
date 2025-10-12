@@ -9,10 +9,16 @@ interface ProductGalleryProps {
   product: Product;
   selectedVariations?: { [attributeId: string]: string };
   productWithVariations?: Product | null;
+  isUpdatingVariations?: boolean;
+}
+
+interface ImageItem {
+  url: string;
+  alt: string;
 }
 
 
-export default function ProductGallery({ product, selectedVariations, productWithVariations }: ProductGalleryProps) {
+export default function ProductGallery({ product, selectedVariations, productWithVariations, isUpdatingVariations }: ProductGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -29,27 +35,68 @@ export default function ProductGallery({ product, selectedVariations, productWit
   });
 
   // Get images from product or variations
-  const getImages = () => {
+  const getImages = useCallback((): ImageItem[] => {
+    console.log('ProductGallery - getImages called');
+    console.log('productWithVariations:', productWithVariations);
+    console.log('product:', product);
+    
+    let images: ImageItem[] = [];
+    console.log('productWithVariations?.gallery:', productWithVariations);
+    
+    // First priority: Use productWithVariations gallery if available
     if (productWithVariations?.gallery && productWithVariations.gallery.length > 0) {
-      return productWithVariations.gallery.map((item: string | { url: string; alt?: string }) => ({
-        url: typeof item === 'string' ? item : item.url,
-        alt: typeof item === 'string' ? product.name || product.title : item.alt || product.name || product.title
+      console.log('Using productWithVariations gallery:', productWithVariations.gallery);
+      images = productWithVariations.gallery.map((item: string | { url: string; original_url?: string; alt?: string }) => ({
+        url: typeof item === 'string' ? item : (item.original_url || item.url),
+        alt: typeof item === 'string' ? product?.name || product?.title : item.alt || product?.name || product?.title
       }));
+    } else {
+      // Second priority: Use original product gallery first
+      if (product?.gallery && product?.gallery.length > 0) {
+        console.log('Using product gallery:', product.gallery);
+        images = product.gallery.map((img: string | { url: string; original_url?: string; alt?: string }) => ({ 
+          url: typeof img === 'string' ? img : (img.original_url || img.url), 
+          alt: typeof img === 'string' ? product?.name || product?.title : img.alt || product?.name || product?.title 
+        }));
+      }
     }
     
-    // Fallback to product images or create from main image
-    if (product.images && product.images.length > 0) {
-      return product.images.map(img => ({ url: img, alt: product.name || product.title }));
+    // Always ensure product thumbnail is included as the first image
+    const thumbnailImage = {
+      url: product?.thumbnail || product?.image,
+      alt: product?.name || product?.title
+    };
+    
+    // Check if thumbnail is already in the images array
+    const thumbnailExists = images.some(img => img.url === thumbnailImage.url);
+    
+    if (!thumbnailExists && thumbnailImage.url) {
+      console.log('Adding product thumbnail as first image');
+      images = [thumbnailImage, ...images];
+    } else if (thumbnailExists) {
+      console.log('Product thumbnail already exists in gallery');
     }
     
-    // For simulation, create multiple images from the main image
-    const mainImage = product.thumbnail || product.image;
- 
+    // If no images at all, use just the thumbnail
+    if (images.length === 0 && thumbnailImage.url) {
+      console.log('Using only product thumbnail');
+      images = [thumbnailImage];
+    }
     
-    return [{ url: mainImage, alt: product.name || product.title }];
-  };
+    console.log('Final images:', images);
+    return images;
+  }, [productWithVariations, product]);
 
-  const images = getImages();
+  const [images, setImages] = useState<ImageItem[]>(() => getImages());
+
+  // Update images when productWithVariations changes
+  useEffect(() => {
+    console.log('ProductGallery - useEffect triggered');
+    console.log('productWithVariations changed:', productWithVariations);
+    const newImages = getImages();
+    console.log('New images:', newImages);
+    setImages(newImages);
+  }, [productWithVariations, product, getImages]);
 
   // Embla Carousel navigation functions
   const scrollPrev = useCallback(() => {
@@ -149,6 +196,18 @@ export default function ProductGallery({ product, selectedVariations, productWit
     <div className="space-y-4">
       {/* Main Image Carousel */}
       <div className="product-gallery relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Loading overlay when updating variations */}
+        {isUpdatingVariations && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-50">
+            <div className="flex items-center gap-2">
+              <svg className="animate-spin w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-sm text-gray-500">Loading variation images...</span>
+            </div>
+          </div>
+        )}
         <div className="embla overflow-hidden" ref={emblaRef}>
           <div className="embla__container flex">
             {images.map((image, index) => (
@@ -162,8 +221,8 @@ export default function ProductGallery({ product, selectedVariations, productWit
                   onMouseLeave={handleMouseLeave}
                 >
                   <Image
-                    src={image.url}
-                    alt={image.alt || `${product.name || product.title} ${index + 1}`}
+                    src={(image as ImageItem).url}
+                    alt={(image as ImageItem).alt || `${product?.name || product?.title} ${index + 1}`}
                     fill
                     className="zoom-image w-full h-full object-cover"
                     priority={index === 0}
@@ -233,7 +292,7 @@ export default function ProductGallery({ product, selectedVariations, productWit
                         ? 'border-primary-500 opacity-100'
                         : 'border-transparent hover:border-primary-300 opacity-60 hover:opacity-80'
                     }`}
-                    src={image.url}
+                    src={(image as ImageItem).url}
                     alt={`Thumbnail ${index + 1}`}
                     width={80}
                     height={80}
