@@ -35,7 +35,7 @@ const HeaderCart: React.FC = () => {
    <>
    {
     isAuthenticated &&
-     <div className="te-navbar-dropdown" ref={dropdownRef}>
+     <div className="te-navbar-dropdown hidden lg:block" ref={dropdownRef}>
      {/* Cart Header */}
      <div
        className="header-cart relative flex items-center gap-3 cursor-pointer"

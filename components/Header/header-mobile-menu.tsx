@@ -168,6 +168,13 @@ function HeaderMobileMenu() {
         <a href="blog.php" className={`te-navbar-link-mobile dark:text-white ${pathname === '/blog.php' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Blog</a>
         <a href="contact.php" className={`te-navbar-link-mobile dark:text-white ${pathname === '/contact.php' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Contact Us</a>
         
+        {/* Cart Link - Only show if authenticated */}
+        {isAuthenticated && (
+          <Link href="/cart" className={`te-navbar-link-mobile dark:text-white ${pathname === '/cart' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>
+            Cart
+          </Link>
+        )}
+        
         {/* Login/Logout Button - At the end of menu */}
         {isAuthenticated ? (
           <button 

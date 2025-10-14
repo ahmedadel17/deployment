@@ -66,7 +66,7 @@ function style1() {
                 {/* <!-- Dark Mode Toggle Button --> */}
                 <div className="items-center lg:hidden  gap-2">
 
-                <LanguageSwitcher />
+                {/* <LanguageSwitcher /> */}
 
                 </div>
                 <HeaderCart />
