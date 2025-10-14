@@ -58,7 +58,6 @@ function style1() {
                     {/* <!-- Wishlist --> */}
                     {/* <!-- Account --> */}
                     {/* <!-- Cart --> */}
-                      <HeaderCart />
 
                    
 
@@ -70,6 +69,7 @@ function style1() {
                 <LanguageSwitcher />
 
                 </div>
+                <HeaderCart />
                 <HeaderDarkMode />
 
                 {/* <!-- Mobile Menu Toggle Button --> */}
