@@ -12,9 +12,10 @@ import toastHelper from '@/lib/toastHelper';
 
 interface HyperPayPaymentProps {
   selectedBrand?: string;
+  onPaymentReady?: () => void;
 }
 
-export default function HyperPayPayment({ selectedBrand }: HyperPayPaymentProps) {
+export default function HyperPayPayment({ selectedBrand, onPaymentReady }: HyperPayPaymentProps) {
   const url= window.location.origin;
   const [checkoutId, setCheckoutId] = useState<string>('');
   const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -51,6 +52,10 @@ export default function HyperPayPayment({ selectedBrand }: HyperPayPaymentProps)
           setCheckoutId(checkoutId);
           console.log('Checkout ID updated:', checkoutId);
           setIsLoading(false);
+          // Notify parent that payment is ready
+          if (onPaymentReady) {
+            onPaymentReady();
+          }
         } else {
           console.error('No checkout ID found in response:', response);
           toastHelper(false, 'Failed to prepare payment. Please try again.');
@@ -68,7 +73,7 @@ export default function HyperPayPayment({ selectedBrand }: HyperPayPaymentProps)
     } else {
       console.log('No cart items or brand found, skipping checkout ID fetch');
     }
-  }, [Cart?.id, selectedBrand, orderState.payment_method, locale, token]);
+  }, [Cart?.id, selectedBrand, orderState.payment_method, locale, token, onPaymentReady]);
 
   // Initialize HyperPay widget options
   useEffect(() => {

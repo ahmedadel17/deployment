@@ -1,12 +1,14 @@
 'use client'
-import React from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import React, { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useOrderState } from '@/context/OrderStateContext';
 import HyperPayPayment from '@/components/checkout/hyperpay'
 import postRequest from '@/lib/post';
 import { useToken } from '@/context/Token';
 import { useCart } from '@/context/Cart';
+import { useLocale } from 'next-intl';
+import toastHelper from '@/lib/toastHelper';
 
 interface PaymentMethodsProps {
   allowedPaymentMethods?: string[];
@@ -17,13 +19,102 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 }) => {
   const t = useTranslations();
   const { orderState, updatePaymentMethod } = useOrderState();
-  const {Cart}=useCart();
+  const { Cart } = useCart();
   const { token } = useToken();
   const locale = useLocale();
+  const [showPaymentOptions, setShowPaymentOptions] = useState(true);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Check if browser is Safari
+  const isSafari = () => {
+    if (typeof window === 'undefined') return false;
+    const userAgent = window.navigator.userAgent;
+    return /Safari/.test(userAgent) && !/Chrome/.test(userAgent) && !/Chromium/.test(userAgent);
+  };
+
+  const handleTamaraPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      const response = await postRequest('/payment/tamara/prepare-checkout', {
+        order_id: Cart?.id,
+      }, {}, token, locale);
+      
+      console.log('Tamara response:', response);
+      
+      if (response.data.status) {
+        // Redirect to Tamara checkout
+        if (response.data.data.checkout_url || response.data.checkoutUrl) {
+          window.location.href = response.data.data.checkout_url || response.data.checkoutUrl;
+        }
+      } else {
+        toastHelper(false, response.data.message || 'Tamara payment preparation failed');
+        setIsProcessingPayment(false);
+        setShowPaymentOptions(true);
+      }
+    } catch (error) {
+      console.error('Tamara payment error:', error);
+      toastHelper(false, 'Tamara payment preparation failed. Please try again.');
+      setIsProcessingPayment(false);
+      setShowPaymentOptions(true);
+    }
+  };
+
+  const handleTabbyPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      const response = await postRequest('/payment/tabby/prepare-checkout', {
+        order_id: Cart?.id,
+      }, {}, token, locale);
+      
+      console.log('Tabby response:', response);
+      
+      if (response.data.status) {
+        // Redirect to Tabby checkout
+        if (response.data.data.checkout_url || response.data.checkoutUrl) {
+          window.location.href = response.data.data.checkout_url || response.data.checkoutUrl;
+        }
+      } else {
+        toastHelper(false, response.data.message || 'Tabby payment preparation failed');
+        setIsProcessingPayment(false);
+        setShowPaymentOptions(true);
+      }
+    } catch (error) {
+      console.error('Tabby payment error:', error);
+      toastHelper(false, 'Tabby payment preparation failed. Please try again.');
+      setIsProcessingPayment(false);
+      setShowPaymentOptions(true);
+    }
+  };
+
 
   const handlePaymentMethodChange = (method: string) => {
     updatePaymentMethod(method);
+    
+    // Handle different payment methods
+    if (method === 'tamara') {
+      // For Tamara, call the API directly
+      setShowPaymentOptions(false);
+      handleTamaraPayment();
+    } else if (method === 'tabby') {
+      // For Tabby, call the API directly
+      setShowPaymentOptions(false);
+      handleTabbyPayment();
+    } else if (method !== 'cod') {
+      // For HyperPay methods (including Apple Pay), hide options and show loading
+      setShowPaymentOptions(false);
+      setIsProcessingPayment(true);
+    }
   };
+
+  const handleBackToPaymentMethods = () => {
+    setShowPaymentOptions(true);
+    setIsProcessingPayment(false);
+    updatePaymentMethod('');
+  };
+
+  const handlePaymentReady = useCallback(() => {
+    setIsProcessingPayment(false);
+  }, []);
 
 
   const allPaymentOptions = [
@@ -89,18 +180,21 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
           <Image width={200} height={200} className="rounded-lg" src="/assets/images/payment/tamara.jpg" alt="Tamara" />
         </div>
       )
-    }
+    },
+    // Apple Pay - only show in Safari
+    ...(isSafari() ? [{
+      value: 'applepay',
+      label: 'Apple Pay',
+      description: 'Pay with Apple Pay',
+      icon: (
+        <div className="w-12 h-12 rounded-lg flex items-center justify-center me-3 shadow-md bg-black">
+          <svg className="w-8 h-8" viewBox="0 0 24 24" fill="white">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+        </div>
+      )
+    }] : [])
   ];
-  const tamara=async()=>{
-    const response=await postRequest('/payment/tamara/prepare-checkout', {
-      order_id: Cart?.id,
-    }, {}, token, locale);
-    console.log(response);
-    if(response.data.status){
-
-      
-    }
-  }   
 
   // Filter payment options based on allowed payment methods
   const paymentOptions = allowedPaymentMethods.length > 0 
@@ -109,14 +203,32 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 my-4">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t('Payment Method')}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          {showPaymentOptions ? t('Payment Method') : t('Processing Payment')}
+        </h2>
+        
+        {/* Back button - only show when payment options are hidden */}
+        {!showPaymentOptions && (
+          <button
+            onClick={handleBackToPaymentMethods}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {t('Change Payment Method')}
+          </button>
+        )}
+      </div>
 
-      {paymentOptions.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-600 dark:text-gray-400">{t('No payment methods available')}</p>
-        </div>
-      ) : (
-        <div>
+      {showPaymentOptions ? (
+        // Show payment options
+        paymentOptions.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 dark:text-gray-400">{t('No payment methods available')}</p>
+          </div>
+        ) : (
           <div className="space-y-3">
             {paymentOptions.map((option) => (
               <label key={option.value} className="flex items-center p-4 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
@@ -144,16 +256,62 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
               </label>
             ))}
           </div>
-
-   
+        )
+      ) : (
+        // Show loading state and HyperPay component
+        <div>
+          {isProcessingPayment && (
+            <div className="flex items-center justify-center p-8 mb-4">
+              <div className="flex items-center gap-3">
+                <svg className="w-6 h-6 animate-spin text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('Preparing payment with')} {orderState.payment_method?.toUpperCase()}...
+                </span>
+              </div>
+            </div>
+          )}
+          
+          {orderState.payment_method && orderState.payment_method !== 'cod' && orderState.payment_method !== 'tamara' && orderState.payment_method !== 'tabby' && (
+            <div className="mt-4">
+              <HyperPayPayment 
+                selectedBrand={orderState.payment_method} 
+                onPaymentReady={handlePaymentReady}
+              />
+            </div>
+          )}
+          
+          {/* Tamara specific loading state */}
+          {orderState.payment_method === 'tamara' && isProcessingPayment && (
+            <div className="flex items-center justify-center p-8">
+              <div className="flex items-center gap-3">
+                <svg className="w-6 h-6 animate-spin text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('Preparing Tamara payment...')}
+                </span>
+              </div>
+            </div>
+          )}
+          
+          {/* Tabby specific loading state */}
+          {orderState.payment_method === 'tabby' && isProcessingPayment && (
+            <div className="flex items-center justify-center p-8">
+              <div className="flex items-center gap-3">
+                <svg className="w-6 h-6 animate-spin text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('Preparing Tabby payment...')}
+                </span>
+              </div>
+            </div>
+          )}
+          
         </div>
       )}
-     {orderState.payment_method!='cod' && orderState.payment_method && <div className='mt-4'>
-
-{  <HyperPayPayment selectedBrand={orderState.payment_method} />}
-
-
-      </div>}
     </div>
   );
 };

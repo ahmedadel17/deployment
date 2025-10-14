@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {useLocale, useTranslations} from 'next-intl'
 import { useCart } from '@/context/Cart';
 import { useOrderState } from '@/context/OrderStateContext';
@@ -11,27 +11,14 @@ import getRequest from '@/lib/getter';
 import { useRouter, usePathname } from 'next/navigation';
 import { CartItem } from '@/types/cart';
 function OrderSummary() {
-  const { Cart, setCart } = useCart();
+  const { Cart } = useCart();
   const { token } = useToken();
-  const { orderState, goToPayment, getOrderPayload, updateShippingRates,updateOrderStatus} = useOrderState();
+  const { orderState, goToPayment, updateShippingRates,updateOrderStatus} = useOrderState();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
   const locale = useLocale();
 
-  const handlePlaceOrder = async() => {
-    
-
-    const payload = getOrderPayload();
-    const response = await postRequest(`/marketplace/cart/cart-details/${Cart?.id}`, payload, {}, token, locale);
-    updateOrderStatus('payment');
-    setCart(response.data.data);
-    toastHelper(response.data.status,response.data.message);
-    if(response.data.status){
-      router.push('/checkout/payment');
-    }
-
-  };
   const goToShippingMethod = async() => {
     // Extract product variations from cart items
     const productVariations = Cart?.products?.map(item => ({
@@ -69,17 +56,9 @@ function OrderSummary() {
     }
   }
 
-  // Helper functions for conditional logic
-  const isAmountZero = () => {
-    const totalAmount = parseFloat((Cart as { total_amount?: string })?.total_amount || '0');
-    return totalAmount === 0;
-  };
 
 
 
-  const isPaymentMethodSelected = () => {
-    return orderState.payment_method && orderState.payment_method !== '';
-  };
 
   const isOnShippingMethodPage = () => {
     return pathname.includes('/ShippingMethod');
@@ -88,16 +67,6 @@ function OrderSummary() {
   const isOnPaymentPage = () => {
     return pathname.includes('/payment');
   };
-  const convertIntoOrder = async() => {
-    const response = await postRequest(`/marketplace/cart/convert-into-order`, {
-      cart_id: Cart?.id,
-    }, {}, token, locale);
-    router.push(`/checkoutConfirmation?orderId=${response.data.data.id}`);
-  }
-  const handleReturnToCheckout = () => {
-    updateOrderStatus('address');
-    router.push('/checkout');
-  }
   return (
     <div className="lg:col-span-1">
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 sticky top-4">
@@ -170,59 +139,37 @@ function OrderSummary() {
       {/* Conditional Buttons */}
       
       {/* 1. If amount is 0.00, show Place Order button */}
-      {isAmountZero() && (
-        <button
-          onClick={handlePayment}
-          className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {t('Place Order')}
-        </button>
-      )}
+     
 
-      {/* 2. Go to Shipping Method - Hide if shipping address selected and not on shipping method page */}
-      {  orderState.order_status=='address' && (
+      {/* Show buttons based on current page */}
+      
+      {/* 1. Checkout page - Show Go to Shipping Method button */}
+      {!isOnShippingMethodPage() && !isOnPaymentPage() && (
         <button
           onClick={goToShippingMethod}
+          disabled={!orderState.user_address_id}
           className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {t('Go to Shipping Method')}
         </button>
       )}
 
-      {/* 3. Proceed to Payment - Show if payment method not selected and not on payment page */}
-      {orderState.order_status=='shipping' && (
+      {/* 2. Shipping Method page - Show Proceed to Payment button */}
+      {isOnShippingMethodPage() && (
         <button
-          onClick={handlePlaceOrder}
+          onClick={() => router.push('/checkout/payment')}
+          disabled={!orderState.user_address_id || !orderState.shipping_slug}
           className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {t('Proceed to Payment')}
         </button>
       )}
 
-      {/* 4. Return to Checkout - Show on payment page */}
-      {isOnPaymentPage() && (
-        <button
-          onClick={handleReturnToCheckout}
-          className="w-full mt-6 py-3 flex items-center justify-center bg-primary-400 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          <span>{t('Return to Checkout')}</span>
-        </button>
-      )}
-
-      {/* 5. Place Order for COD - Show if payment method is COD and not zero amount */}
-      {orderState.order_status=='payment' && (
+      {/* 3. Payment page - Show Place Order button only for COD */}
+      {isOnPaymentPage() && orderState.payment_method === 'cod' && (
         <button
           onClick={handlePayment}
-          className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {t('Place Order')}
-        </button>
-      )}
-        {/* 5. Place Order for COD - Show if payment method is COD and not zero amount */}
-        {isAmountZero() && (
-        <button
-          onClick={convertIntoOrder}
-          className="w-full mt-3 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full mt-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium text-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {t('Place Order')}
         </button>

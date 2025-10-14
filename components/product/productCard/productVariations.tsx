@@ -18,21 +18,6 @@ function ProductVariations({
   setSelectedSize, 
   getProductByVariations 
 }: ProductVariationsProps) {
-  const getColorClass = (color: string) => {
-    const colorMap: { [key: string]: string } = {
-      'red': 'bg-red-500',
-      'blue': 'bg-blue-500',
-      'green': 'bg-green-500',
-      'yellow': 'bg-yellow-500',
-      'purple': 'bg-purple-500',
-      'pink': 'bg-pink-500',
-      'orange': 'bg-orange-500',
-      'black': 'bg-black',
-      'white': 'bg-white border border-gray-300',
-      'gray': 'bg-gray-500',
-    };
-    return colorMap[color.toLowerCase()] || 'bg-gray-500';
-  };
 
   return (
     <>
@@ -86,9 +71,9 @@ function ProductVariations({
 
       {/* Size Options */}
       {product?.variations && product.variations.length > 0 && (
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-gray-500">Sizes:</span>
-          <div className="flex gap-1 flex-wrap">
+        <div className="mb-3">
+          <span className="text-xs text-gray-500 block mb-2">Sizes:</span>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:flex lg:flex-wrap gap-1">
             {product?.variations[0]?.values?.map((size) => (
               <button
                 key={size.id}
@@ -119,7 +104,7 @@ function ProductVariations({
                     console.log('Not all variations selected yet, skipping API call');
                   }
                 }}
-                className={`px-2 py-1 text-xs rounded border transition-all duration-200 hover:scale-105 ${
+                className={`px-2 py-1 text-xs rounded border transition-all duration-200 hover:scale-105 min-w-0 flex items-center justify-center ${
                   selectedSize && typeof selectedSize === 'object' && 'id' in selectedSize && selectedSize.id === size.id
                     ? 'bg-primary-500 text-white border-primary-500'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'

@@ -91,7 +91,7 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
           {item.size && <span>Size: {String(item.size)}</span>}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
             <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
             <QuantityInput
@@ -102,7 +102,7 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
               className="ml-2"
             />
              <button 
-               className={`px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md transition-colors ${
+               className={`px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md transition-colors ${
                  isLoading 
                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
                    : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'
@@ -112,8 +112,9 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
              >
                {isLoading ? (
                  <div className="flex items-center">
-                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
-                   <span>Updating...</span>
+                   <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-gray-500 mr-1 sm:mr-2"></div>
+                   <span className="hidden sm:inline">Updating...</span>
+                   <span className="sm:hidden">...</span>
                  </div>
                ) : (
                  'Update'
@@ -121,10 +122,10 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
              </button>
           </div>
 
-          <div className="text-right">
-            <div className="flex items-center space-x-2">
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                <span className="icon-riyal-symbol"></span>
+          <div className="text-right sm:text-right">
+            <div className="flex items-center justify-end space-x-1">
+              <span className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                <span className="icon-riyal-symbol text-sm"></span>
                 {Number(item.price).toFixed(2)}
               </span>
             </div>

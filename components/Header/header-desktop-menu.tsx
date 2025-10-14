@@ -1,12 +1,16 @@
+'use client'
 import {getTranslations} from 'next-intl/server';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-async function HeaderDesktopMenu() {
-    const t = await getTranslations();
+function HeaderDesktopMenu() {
+    const t = useTranslations();
+    const pathname = usePathname();
   return (
     <div className="te-navbar-nav te-navbar-nav-desktop border-t border-gray-100 dark:border-gray-700 justify-center hidden lg:flex">
 
-    <Link href="/" className="te-navbar-link te-navbar-link-active">{t("Home")}</Link>
+    <Link href="/" className={`te-navbar-link ${pathname === '/' ? 'te-navbar-link-active' : ''}`}>{t("Home")}</Link>
 
     <div className="te-navbar-mega-dropdown"><a href="#" className="te-navbar-link te-navbar-link-has-mega-menu">{t("Men")}</a>
         <div className="te-navbar-mega-menu te-navbar-mega-menu-2-col">
@@ -91,10 +95,10 @@ async function HeaderDesktopMenu() {
     </div>
     {/* <!-- .te-navbar-dropdown --> */}
 
-    <Link href="/products" className="te-navbar-link">{t("Products")}</Link>
-    <a href="cotton.php" className="te-navbar-link">{t("Cotton")}</a>
-    <a href="blog.php" className="te-navbar-link">{t("Blog")}</a>
-    <a href="contact.php" className="te-navbar-link">{t("Contact Us")}</a>
+    <Link href="/products" className={`te-navbar-link ${pathname.startsWith('/products') ? 'te-navbar-link-active' : ''}`}>{t("Products")}</Link>
+    <a href="cotton.php" className={`te-navbar-link ${pathname === '/cotton.php' ? 'te-navbar-link-active' : ''}`}>{t("Cotton")}</a>
+    <a href="blog.php" className={`te-navbar-link ${pathname === '/blog.php' ? 'te-navbar-link-active' : ''}`}>{t("Blog")}</a>
+    <a href="contact.php" className={`te-navbar-link ${pathname === '/contact.php' ? 'te-navbar-link-active' : ''}`}>{t("Contact Us")}</a>
 
 </div>
   )

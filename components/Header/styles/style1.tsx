@@ -68,6 +68,7 @@ function style1() {
                 <div className="items-center lg:hidden  gap-2">
 
                 <LanguageSwitcher />
+
                 </div>
                 <HeaderDarkMode />
 

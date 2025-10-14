@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import React from 'react'
 import { useTranslations } from 'next-intl'
-function EmptyCart() {
+
+interface EmptyCartProps {
+  onClose?: () => void;
+}
+
+function EmptyCart({ onClose }: EmptyCartProps) {
   const t = useTranslations();
   return (
     <div className="text-center py-12">
@@ -12,7 +17,11 @@ function EmptyCart() {
     </div>
     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('Your cart is empty')}</h3>   
     <p className="text-gray-600 dark:text-gray-400 mb-4">{t('Add some items to get started')}</p>
-    <Link href="/products" className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
+    <Link 
+      href="/products" 
+      className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+      onClick={onClose}
+    >
       {t('Continue Shopping')}
     </Link>
   </div>

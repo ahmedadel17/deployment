@@ -1,13 +1,17 @@
 'use client'
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react'
+import { useToken } from '@/context/Token';
+import { LogIn, LogOut } from 'lucide-react';
 
 function HeaderMobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, setToken } = useToken();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -58,6 +62,12 @@ function HeaderMobileMenu() {
     setIsOpen(false);
     setOpenSubmenus(new Set());
   };
+
+  const handleLogout = () => {
+    setToken(null);
+    router.push('/');
+    closeMenu();
+  };
   return (
     <>
       <button 
@@ -76,7 +86,7 @@ function HeaderMobileMenu() {
 <div className={`te-navbar-nav-mobile ${isOpen ? 'te-navbar-nav-mobile-show' : ''}`} id="mobile-navigation" aria-label="Mobile Navigation" ref={dropdownRef}>
     <div className="flex flex-col">
 
-        <Link href="/" className="te-navbar-link-mobile te-navbar-link-active" onClick={closeMenu}>Home</Link>
+        <Link href="/" className={`te-navbar-link-mobile ${pathname === '/' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Home</Link>
 
         <a
           href="#" 
@@ -153,11 +163,24 @@ function HeaderMobileMenu() {
         </div>
 
 
-        <Link href="/products" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Products</Link>
-        <Link href="/auth2/login" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>login</Link>
-        <a href="#" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>New Arrivals</a>
-        <a href="blog.php" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Blog</a>
-        <a href="contact.php" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>Contact Us</a>
+        <Link href="/products" className={`te-navbar-link-mobile dark:text-white ${pathname.startsWith('/products') ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Products</Link>
+        <a href="#" className={`te-navbar-link-mobile dark:text-white ${pathname === '/new-arrivals' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>New Arrivals</a>
+        <a href="blog.php" className={`te-navbar-link-mobile dark:text-white ${pathname === '/blog.php' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Blog</a>
+        <a href="contact.php" className={`te-navbar-link-mobile dark:text-white ${pathname === '/contact.php' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Contact Us</a>
+        
+        {/* Login/Logout Button - At the end of menu */}
+        {isAuthenticated ? (
+          <button 
+            onClick={handleLogout}
+            className="te-navbar-link-mobile dark:text-white"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link href="/auth2/login" className="te-navbar-link-mobile dark:text-white" onClick={closeMenu}>
+            Login
+          </Link>
+        )}
 
     </div>
 </div>

@@ -4,10 +4,9 @@ import {useTranslations} from 'next-intl';
 import DropDownCartItem from "../cart/dropDownCartItem";
 import { useCart } from "@/context/Cart";
 import EmptyCart from "../cart/emptyCart";
-import tokenGetter from "@/lib/tokenGetter";
 import { useTokenSafe } from "@/context/Token";
 const HeaderCart: React.FC = () => {
-  const { Cart, setCart } = useCart();
+  const { Cart } = useCart();
   const { isAuthenticated } = useTokenSafe();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -70,7 +69,7 @@ const HeaderCart: React.FC = () => {
        </div>
 
        {/* Cart Count */}
-       <div className="grid">
+       <div className=" hidden lg:grid">
          <span className="text-gray-600 dark:text-gray-400 text-sm">
            {t("My Cart")}
          </span>
@@ -92,8 +91,8 @@ const HeaderCart: React.FC = () => {
 
        {/* Cart Total */}
        {
-         Cart?.products?.length == 0 || !Cart?.products ? (
-           <EmptyCart />
+         !Cart || Cart.products.length === 0 ? (
+           <EmptyCart onClose={() => setIsOpen(false)} />
          ) : (
        <div className="mt-6">
          <div className="flex justify-between items-center font-medium mb-3 text-gray-900 dark:text-white">
@@ -108,12 +107,12 @@ const HeaderCart: React.FC = () => {
            <a href="/cart" className="w-full te-btn te-btn-default text-center block">
              {t("View Cart")}
            </a>
-           <a
+           {/* <a
              href="/checkout"
              className="w-full te-btn te-btn-primary text-center block"
            >
              {t("Checkout")}
-           </a>
+           </a> */}
          </div>
        </div>
        )
