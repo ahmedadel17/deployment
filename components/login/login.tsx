@@ -4,15 +4,14 @@ import React, { useEffect } from 'react'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import CountryPhoneInput from '@/components/phone/CountryPhoneInput';
-import { useToken } from '@/context/Token';
 import tokenGetter from '@/lib/tokenGetter';
-
+import { useTranslations } from 'next-intl';
 function Login() {
     interface PhoneFormValues {
         phone: string;
         countryCode: string;
     }
-    
+    const t = useTranslations();
     const router = useRouter();
     useEffect(() => {
       const token = tokenGetter()
@@ -59,9 +58,7 @@ function Login() {
             const phoneCode = country?.dialCode || '+966';
             const phoneData = { phone: `${phoneCode}${values.phone}` };
             
-            const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/send-otp", phoneData);
-            console.log('API response:', response.data);
-            
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_BASE_URL+"/auth/send-otp", phoneData);            
             if(response.data.data.registered){
                router.push(`/auth2/otp?phone=${values.phone}&country=${values.countryCode}`);
             }
@@ -131,10 +128,10 @@ function Login() {
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    <span>Checking...</span>
+                    <span>{t("Checking")}...</span>
                   </>
                 ) : (
-                  <span>Continue</span>
+                  <span>{t("Continue")}</span>
                 )}
             </button>
         </div>

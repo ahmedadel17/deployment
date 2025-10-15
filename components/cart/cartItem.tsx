@@ -124,6 +124,12 @@ const updateCartItemQty = async (item_id: string, newQuantity: number) => {
 
           <div className="text-right sm:text-right">
             <div className="flex items-center justify-end space-x-1">
+              {item.price_before_discount && item.price_before_discount > item.price && (
+                <span className="text-sm text-gray-500 dark:text-gray-400 line-through mr-2">
+                  <span className="icon-riyal-symbol text-xs"></span>
+                  {Number(item.price_before_discount).toFixed(2)}
+                </span>
+              )}
               <span className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                 <span className="icon-riyal-symbol text-sm"></span>
                 {Number(item.price).toFixed(2)}

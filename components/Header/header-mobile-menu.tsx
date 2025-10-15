@@ -86,7 +86,7 @@ function HeaderMobileMenu() {
 <div className={`te-navbar-nav-mobile ${isOpen ? 'te-navbar-nav-mobile-show' : ''}`} id="mobile-navigation" aria-label="Mobile Navigation" ref={dropdownRef}>
     <div className="flex flex-col">
 
-        <Link href="/" className={`te-navbar-link-mobile ${pathname === '/' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Home</Link>
+        <Link href="/" className={`te-navbar-link-mobile dark:text-white ${pathname === '/' ? 'te-navbar-link-active' : ''}`} onClick={closeMenu}>Home</Link>
 
         <a
           href="#" 

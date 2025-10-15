@@ -173,8 +173,8 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
               {({ setFieldValue, values }) => (
                 <Form>
                   {/* Quantity */}
-                  <div className="product-quantity">
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t("Quantity")}</h3>
+                  <div className="product-quantity mb-6">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{t("Quantity")}</h3>
                       <QuantityInput
                         value={Number(values.qty)}
                         onChange={(newValue) => setFieldValue('qty', newValue)}
@@ -185,7 +185,11 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
                         stockLabel={t("Only")}
                       />
                   </div>
-           <Variations variations={variations} isSelected={isSelected} isUpdatingVariations={isUpdatingVariations} handleVariationSelect={handleVariationSelect} />
+
+                  {/* Variations (Size, Color, etc.) */}
+                  <div className="product-variations mb-6">
+                    <Variations variations={variations} isSelected={isSelected} isUpdatingVariations={isUpdatingVariations} handleVariationSelect={handleVariationSelect} />
+                  </div>
             <TextArea
               name="customer_note"
               label="Do you have another comment?"

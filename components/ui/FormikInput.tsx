@@ -1,6 +1,7 @@
 'use client'
 import React from 'react';
 import { Field, ErrorMessage } from 'formik';
+import { useLocale } from 'next-intl';
 
 interface FormikInputProps {
   name: string;
@@ -25,8 +26,9 @@ const FormikInput: React.FC<FormikInputProps> = ({
   disabled = false,
   id
 }) => {
+  const locale = useLocale();
   const inputId = id || name;
-  const baseClasses = "w-full border rounded px-3 py-2 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500";
+  const baseClasses = `w-full border rounded px-3 py-2 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${locale === 'ar' ? 'text-right' : 'text-left'}`;
   const combinedClassName = `${baseClasses} ${className}`.trim();
 
   return (
@@ -45,6 +47,7 @@ const FormikInput: React.FC<FormikInputProps> = ({
         placeholder={placeholder}
         autoComplete={autoComplete}
         disabled={disabled}
+        dir={locale === 'ar' ? 'rtl' : 'ltr'}
       />
       <ErrorMessage name={name} component="div" className="text-red-600 text-sm mt-1" />
     </div>

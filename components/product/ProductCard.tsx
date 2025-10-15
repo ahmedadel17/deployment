@@ -179,21 +179,20 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
 
   return (
     <div 
-      className={`lg:product-item group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-200 dark:border-gray-700 ${
+      className={`product-item w-full h-full lg:bg-white dark:lg:bg-gray-800 rounded-md lg:rounded-lg lg:shadow flex flex-col ${
         carousel ? 'flex-shrink-0' : ''
       }`}
       data-product-id={product.id}
       data-product-title={product.title}
       data-product-price={product.price}
       data-product-image={product.image}
-      
     >
       {/* Product Image */}
     
       <ProductImage product={getCurrentProduct()} productWithVariations={getCurrentProduct()} />
 
       {/* Product Info */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="mt-3 lg:mt-0 lg:p-3 p-3 sm:p-4 flex flex-col flex-1">
         <ProductInfo product={product} getCurrentProduct={getCurrentProduct} />
 
         <ProductVariations 
@@ -206,7 +205,7 @@ export default function ProductCard({ product, carousel = false }: ProductCardPr
         />
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="product-footer mt-auto flex gap-2 items-stretch">
           <ProductActions
             isAddedToCart={isAddedToCart}
             isLoadingVariations={isLoadingVariations}

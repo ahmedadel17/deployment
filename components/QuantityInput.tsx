@@ -69,7 +69,7 @@ export default function QuantityInput({
           value={value}
           onChange={handleInputChange}
           disabled={disabled}
-          className="w-16 !rounded-none border-0 focus:outline-none text-center bg-transparent"
+          className="w-16 !rounded-none border-0 focus:outline-none text-center bg-transparent text-gray-900 dark:text-white"
         />
 
         {/* Increase Button */}

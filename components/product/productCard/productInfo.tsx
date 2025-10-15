@@ -9,28 +9,32 @@ interface ProductInfoProps {
 
 function ProductInfo({ product, getCurrentProduct }: ProductInfoProps) {
   return (
-    <div className="flex-1">
-      <Link href={`/products/${getCurrentProduct().slug}`}>
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
+    <div className="product-body space-y-2 mb-2 sm:mb-3">
+      {/* Category */}
+      {getCurrentProduct()?.category && (
+        <p className="product-category text-xs font-semibold uppercase text-gray-500 dark:text-white">
+          {getCurrentProduct().category as unknown as string}
+        </p>
+      )}
+
+      <h3 className="product-title font-semibold text-sm sm:text-base dark:text-white">
+        <Link href={`/products/${getCurrentProduct().slug}`} className="line-clamp-2 dark:text-white">
           {getCurrentProduct()?.name}
-        </h3>
-      </Link>
-      <Link href={`/products/${getCurrentProduct().slug}`}>
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary-500 transition-colors">
-          {getCurrentProduct()?.short_description}
-        </h4>
-      </Link>
+        </Link>
+      </h3>
 
       {/* Price */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg font-bold text-gray-900 dark:text-white">
-          ${getCurrentProduct()?.price_after_discount || getCurrentProduct()?.price}
-        </span>
+      <div className="product-price flex items-center gap-1 flex-wrap">
         {getCurrentProduct()?.price_befor_discount && (
-          <span className="text-sm text-gray-500 line-through">
-            ${getCurrentProduct()?.price_befor_discount || getCurrentProduct()?.min_price}
-          </span>
+          <p className="text-gray-500 dark:text-gray-300 line-through text-sm flex items-center gap-1">
+            <span className="icon-riyal-symbol"></span>
+            {getCurrentProduct()?.price_befor_discount || getCurrentProduct()?.min_price}
+          </p>
         )}
+        <p className="text-sm sm:text-base font-semibold text-secondary-600 dark:text-yellow-400 flex items-center gap-1">
+          <span className="icon-riyal-symbol dark:text-yellow-400"></span>
+          {getCurrentProduct()?.price_after_discount || getCurrentProduct()?.price}
+        </p>
       </div>
     </div>
   );

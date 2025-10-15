@@ -126,8 +126,8 @@ export default function ProductPageClient({ product, variations }: ProductPageCl
              <Description product={product} />
 
               {/* Quantity */}
-              <div className="product-quantity">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t("Quantity")}</h3>
+              <div className="product-quantity mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{t("Quantity")}</h3>
                 <QuantityInput
                   value={Number(values.qty)}
                   onChange={(newValue) => setFieldValue('qty', newValue)}

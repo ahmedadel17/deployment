@@ -8,7 +8,7 @@ import getRequest from '@/lib/getter'
 import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useToken } from '@/context/Token';
-
+import { useTranslations } from 'next-intl';
 interface ProductInteractiveProps {
   initialProducts?: Product[]
   initialPagination?: {
@@ -42,7 +42,7 @@ export default function ProductInteractive({
   // Get current locale from next-intl
   const locale = useLocale();
   const { token, isInitialized } = useToken();
-  
+  const t = useTranslations();
   // Get search parameters from URL
   const searchParams = useSearchParams();
   const urlSearchQuery = searchParams.get('search');
@@ -104,7 +104,7 @@ export default function ProductInteractive({
           </h3>
           {!isLoading && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Found {pagination.total} products
+              {t('Found')} {pagination.total} {t('products')}
             </p>
           )}
         </div>
@@ -114,7 +114,7 @@ export default function ProductInteractive({
       <div className="flex items-center justify-end space-x-1 rtl:space-x-reverse mb-6">
         {/* Order Select */}
         <form className="flex items-center space-x-2 rtl:space-x-reverse">
-          <label htmlFor="order" className="sr-only">Sort by:</label>
+          <label htmlFor="order" className="sr-only">{t('Sort by')}:</label>
           <select 
             className='w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500' 
             id="order" 
@@ -122,16 +122,16 @@ export default function ProductInteractive({
             value={order} 
             onChange={(e) => setOrder(e.target.value)}
           >
-            <option value="default">Default</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-            <option value="newest">Newest</option>
+            <option value="default">{t('Default')}</option>
+            <option value="price_asc">{t('Price Low to High')}</option>
+            <option value="price_desc">{t('Price High to Low')}</option>
+            <option value="newest">{t('Newest')}</option>
           </select>
         </form>
 
         {/* Products Per Page / Grid Columns Select */}
         <form className="hidden lg:flex items-center space-x-2 rtl:space-x-reverse">
-          <label htmlFor="per_page" className="sr-only">Products per page / grid columns:</label>
+          <label htmlFor="per_page" className="sr-only">{t("Products per page")} / {t("grid columns")}:</label>
           <select 
             className='w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500' 
             id="per_page" 
@@ -139,9 +139,9 @@ export default function ProductInteractive({
             value={perPage} 
             onChange={(e) => setPerPage(e.target.value)}
           >
-            <option value="6">2 Columns</option>
-            <option value="9">3 Columns</option>
-            <option value="12">4 Columns</option>
+            <option value="6">{t('2 Columns')}</option>
+            <option value="9">{t('3 Columns')}</option>
+            <option value="12">{t('4 Columns')}</option>
           </select>
         </form>
       </div>
@@ -152,7 +152,7 @@ export default function ProductInteractive({
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading products...</p>
+              <p className="text-gray-600 dark:text-gray-400">{t('Loading products')}</p>
             </div>
           </div>
         ) : (

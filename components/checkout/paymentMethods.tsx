@@ -37,6 +37,8 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       setIsProcessingPayment(true);
       const response = await postRequest('/payment/tamara/prepare-checkout', {
         order_id: Cart?.id,
+        success_url: window.location.origin + `/checkoutConfirmation?orderId=${Cart?.id}`,
+        cancel_url: window.location.origin + `/checkoutConfirmation?orderId=${Cart?.id}`,
       }, {}, token, locale);
       
       console.log('Tamara response:', response);
@@ -64,6 +66,8 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       setIsProcessingPayment(true);
       const response = await postRequest('/payment/tabby/prepare-checkout', {
         order_id: Cart?.id,
+        success_url: window.location.origin + `/checkoutConfirmation?orderId=${Cart?.id}`,
+        cancel_url: window.location.origin + `/checkoutConfirmation?orderId=${Cart?.id}`,
       }, {}, token, locale);
       
       console.log('Tabby response:', response);

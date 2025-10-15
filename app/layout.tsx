@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import HeaderStyle1 from "@/components/Header/styles/style1";
 import FooterStyle1 from "@/components/Footer/styles/style1";
+import MobileFooterNav from "@/components/Footer/mobile-footer-nav";
 import "./globals.css";
 import HeaderTopBar from "@/components/Header/header-top-bar";
 import Marquee from "@/components/Header/marquee";
@@ -44,11 +45,12 @@ export default async function RootLayout({children}: Props) {
               <HeaderTopBar/>
               <HeaderStyle1 />
           
-              <main className="flex-1 dark:bg-gray-900 bg-gray-50">
+              <main className="flex-1 dark:bg-gray-900 bg-gray-50 pb-16 lg:pb-0">
                 {children}
               </main>
               
               <FooterStyle1 />
+              <MobileFooterNav />
             
               </CartProvider>
             </TokenProvider>

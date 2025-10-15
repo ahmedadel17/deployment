@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import * as countriesData from "country-codes-flags-phone-codes";
 import Flag from 'react-world-flags'
-
+import { useTranslations, useLocale } from 'next-intl';  
 const countries = countriesData?.countries || [];
 
 // Default to Saudi Arabia
@@ -35,6 +35,8 @@ export default function CountryPhoneInput({
   className = "",
   initialCountryCode = 'SA'
 }: CountryPhoneInputProps) {
+  const t = useTranslations();
+  const locale = useLocale();
   const [selectedCountry, setSelectedCountry] = useState(() => {
     const country = countries.find(c => c.code === initialCountryCode);
     return country || defaultCountry;
@@ -140,7 +142,7 @@ export default function CountryPhoneInput({
     <div className={className}>
       {label && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          {label}
+          {t(label)}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
@@ -171,7 +173,7 @@ export default function CountryPhoneInput({
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search countries..."
+                placeholder={t("Search countries")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -202,7 +204,7 @@ export default function CountryPhoneInput({
                 ))
               ) : (
                 <div className="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                  No countries found
+                  {t("No countries found")}
                 </div>
               )}
             </div>
@@ -218,16 +220,17 @@ export default function CountryPhoneInput({
             error && touched 
               ? 'border-red-500 dark:border-red-500' 
               : 'border-gray-300 dark:border-gray-600'
-          } ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600' : ''}`}
-          placeholder={placeholder}
+          } ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600' : ''} ${locale === 'ar' ? 'text-right' : 'text-left'}`}
+          placeholder={t(placeholder)}
           onChange={handlePhoneChange}
           onBlur={onBlur}
           value={value}
+          dir={locale === 'ar' ? 'rtl' : 'ltr'}
         />
       </div>
       
       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        Enter your {selectedCountry.name} phone number (7-11 digits)
+        {t("Enter your")} {selectedCountry.name} {t("phone number")} (7-11 {t("digits")})
       </p>
       
       {error && touched && (
@@ -244,7 +247,7 @@ export default function CountryPhoneInput({
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          Valid phone number
+          {t("Valid phone number")}
         </p>
       )}
     </div>

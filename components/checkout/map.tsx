@@ -94,6 +94,7 @@ export default function LocationPicker({ onLocationSelect }: Props) {
     }
   }, [onLocationSelect]);
 
+
   if (!isLoaded) return <p>Loading Map...</p>;
 
   return (

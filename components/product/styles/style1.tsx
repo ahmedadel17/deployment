@@ -75,8 +75,8 @@ export default async function ProductStyle1({ searchParams }: ProductStyle1Props
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {searchParams?.search 
-                      ? `Found ${initialPagination.total} products` 
-                      : `Showing ${initialPagination.count} of ${initialPagination.total} products`
+                      ? `${t('Found')} ${initialPagination.total} ${t('products')}` 
+                      : `${t('Showing')} ${initialPagination.count} ${t('of')} ${initialPagination.total} ${t('products')}`
                     }
                   </p>
                 </div>

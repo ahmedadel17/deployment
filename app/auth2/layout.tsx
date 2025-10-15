@@ -1,7 +1,9 @@
 import React from 'react'
 import ThemeInitializer from '@/components/ThemeInitializer'
+import { useTranslations } from 'next-intl';
 
 function Auth2Layout({children}: {children: React.ReactNode}) {
+  const t = useTranslations();
   return (
       <>
     
@@ -13,10 +15,10 @@ function Auth2Layout({children}: {children: React.ReactNode}) {
             {/* Logo/Header */}
             <div className="text-center">
               <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-                Welcome Back
+                {t("Welcome Back")}
               </h2>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Sign in to your account or create a new one
+                {t("Sign in to your account or create a new one")}
               </p>
             </div>
             {children}

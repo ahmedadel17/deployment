@@ -4,10 +4,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './product/ProductCard';
-
+import { useTranslations } from 'next-intl';
 export default function ProductSlider({ products }: { products: any[] }) {
   console.log('products',products);
   const [isRTL, setIsRTL] = useState(false);
+  const t = useTranslations();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     containScroll: false,
@@ -70,10 +71,10 @@ export default function ProductSlider({ products }: { products: any[] }) {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="product-title text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Featured Products
+                {t('Featured Products')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Discover our carefully curated collection of premium products
+                {t('Discover our carefully curated collection of premium products')}
               </p>
             </div>
 
@@ -107,14 +108,28 @@ export default function ProductSlider({ products }: { products: any[] }) {
           {/* Embla Carousel Wrapper */}
           <div className="embla overflow-hidden relative" ref={emblaRef}>
             <div className="embla__container flex gap-3 lg:gap-6 py-1">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="embla__slide flex-shrink-0 py-1 [flex:0_0_calc(50%-0.75rem)] md:[flex:0_0_calc(33.333%-0.75rem)] lg:[flex:0_0_calc(25%-1.2rem)]"
-                >
-                  <ProductCard product={product} carousel={true} />
-                </div>
-              ))}
+              {products.map((product, index) => {
+                // Group products in pairs for two products per slide
+                if (index % 2 === 0) {
+                  const nextProduct = products[index + 1];
+                  return (
+                    <div
+                      key={`slide-${index}`}
+                      className="embla__slide flex-shrink-0 py-1 w-full flex gap-3"
+                    >
+                      <div className="flex-1">
+                        <ProductCard product={product} carousel={true} />
+                      </div>
+                      {nextProduct && (
+                        <div className="flex-1">
+                          <ProductCard product={nextProduct} carousel={true} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null; // Skip odd indices as they're handled in the pair above
+              })}
             </div>
           </div>
 
