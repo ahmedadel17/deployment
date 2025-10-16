@@ -1,110 +1,72 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { useCallback, useState } from "react";
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
-type Props = {
-  onLocationSelect: (lat: number, lng: number, address?: string) => void;
-};
+export default function LocationPicker() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [map, setMap] = useState<any>(null);
+  const [marker, setMarker] = useState<any>(null);
 
-export default function LocationPicker({ onLocationSelect }: Props) {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY as string,
-  });
+  useEffect(() => {
+    // Load Google Maps Script
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initMap;
+    document.body.appendChild(script);
+  }, []);
 
-  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(
-    null
-  );
-  const cleanMapStyle: google.maps.MapTypeStyle[] = [
-    {
-      featureType: "poi", // points of interest (restaurants, shops, etc.)
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "transit", // bus stops, train stations
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "administrative", // country/state/city borders
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "road", // keep roads visible but remove labels
-      elementType: "labels",
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "all",
-      elementType: "labels.icon", // remove all small icons
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "landscape.man_made", // remove 3D buildings
-      stylers: [{ visibility: "off" }],
-    },
-  ];
-  
+  const initMap = () => {
+    const center = { lat: 30.0444, lng: 31.2357 }; // Cairo as default
+    const google = window.google;
 
-  // Build a human-friendly address without street numbers
-  const buildFriendlyAddress = (
-    components: google.maps.GeocoderAddressComponent[] | undefined,
-    formatted?: string
-  ): string | undefined => {
-    if (!components || !components.length) return formatted;
-    let route = '';
-    let sublocality = '';
-    let neighborhood = '';
-    let locality = '';
-    let admin1 = '';
+    // Create map
+    const mapInstance = new google.maps.Map(mapRef.current, {
+      center,
+      zoom: 10,
+    });
+    setMap(mapInstance);
 
-    for (const comp of components) {
-      if (comp.types.includes('route')) route = comp.long_name;
-      else if (comp.types.includes('sublocality') || comp.types.includes('sublocality_level_1')) sublocality = comp.long_name;
-      else if (comp.types.includes('neighborhood')) neighborhood = comp.long_name;
-      else if (comp.types.includes('locality')) locality = comp.long_name;
-      else if (comp.types.includes('administrative_area_level_1')) admin1 = comp.long_name;
-    }
+    // Create marker
+    const markerInstance = new google.maps.Marker({
+      position: center,
+      map: mapInstance,
+    });
+    setMarker(markerInstance);
 
-    const parts = [route, sublocality || neighborhood, locality || admin1].filter(Boolean);
-    const friendly = parts.join(', ');
-    return friendly || formatted;
+    // Setup autocomplete
+    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+      componentRestrictions: { country: "eg" }, // restrict to Egypt
+      fields: ["geometry", "formatted_address"],
+    });
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry || !place.geometry.location) return;
+
+      const location = place.geometry.location;
+      mapInstance.setCenter(location);
+      mapInstance.setZoom(15);
+      markerInstance.setPosition(location);
+    });
   };
 
-  const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
-    if (event.latLng) {
-      const lat = event.latLng.lat();
-      const lng = event.latLng.lng();
-      setMarker({ lat, lng });
-
-      // Reverse geocode to get human-readable address
-      try {
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-          if (status === 'OK' && results && results[0]) {
-            const best = results.find(r => r.types.includes('establishment') || r.types.includes('point_of_interest')) || results[0];
-            const friendly = buildFriendlyAddress(best.address_components, best.formatted_address);
-            onLocationSelect(lat, lng, friendly);
-          } else {
-            onLocationSelect(lat, lng, undefined);
-          }
-        });
-      } catch {
-        onLocationSelect(lat, lng, undefined);
-      }
-    }
-  }, [onLocationSelect]);
-
-
-  if (!isLoaded) return <p>Loading Map...</p>;
-
   return (
-    <GoogleMap
-      zoom={5}
-      center={{ lat: 30.0444, lng: 31.2357 }} // Egypt default center
-      mapContainerStyle={{ width: "100%", height: "400px" }}
-      onClick={handleMapClick}
-    >
-      {marker && <Marker position={marker} draggable onDragEnd={handleMapClick} />}
-    </GoogleMap>
+    <div className="flex flex-col items-center gap-4 p-4">
+      <input
+        ref={inputRef}
+        type="text"
+        placeholder="Search for a location..."
+        className="border rounded-md p-2 w-full max-w-md"
+      />
+      <div ref={mapRef} className="w-full h-[500px] rounded-lg shadow" />
+    </div>
   );
 }
