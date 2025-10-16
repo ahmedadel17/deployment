@@ -75,12 +75,13 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
   
   const handleVariationSelect = async (attributeId: string, value: string) => {
     // Toggle selection: if the same value is clicked, unselect it
-    const isSameValueClicked = selectedVariations[attributeId] === value;
+    const key = String(attributeId);
+    const isSameValueClicked = selectedVariations[key] === value;
     const newSelection: SelectedVariations = { ...selectedVariations };
     if (isSameValueClicked) {
-      delete newSelection[attributeId];
+      delete newSelection[key];
     } else {
-      newSelection[attributeId] = value;
+      newSelection[key] = value;
     }
 
     setSelectedVariations(newSelection);
@@ -88,7 +89,7 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
     onVariationChange?.(newSelection);
 
     // Check if all variations are selected
-    const allVariationsSelected = variations.every(v => Object.prototype.hasOwnProperty.call(newSelection, v.attribute_id));
+    const allVariationsSelected = variations.every(v => Object.prototype.hasOwnProperty.call(newSelection, String(v.attribute_id)));
     
     if (allVariationsSelected) {
       // Check if the selection has actually changed (not just the same selection)
@@ -120,7 +121,8 @@ export default function ProductVariations({ variations, onSelectionChange, onVar
   };
 
   const isSelected = (attributeId: string, value: string) => {
-    return selectedVariations[attributeId] === value;
+    const key = String(attributeId);
+    return String(selectedVariations[key]) === String(value);
   };
 
   const isAllVariationsSelected = () => {

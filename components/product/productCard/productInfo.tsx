@@ -23,6 +23,16 @@ function ProductInfo({ product, getCurrentProduct }: ProductInfoProps) {
         </Link>
       </h3>
 
+      {/* Short Description */}
+      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+        {getCurrentProduct()?.short_description || 'A premium quality product crafted with attention to detail for everyday comfort and style.'}
+      </p>
+
+      {/* Extra Dummy Description */}
+      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+        {'Experience unmatched comfort, versatile design, and durable materials perfect for daily wear.'}
+      </p>
+
       {/* Price */}
       <div className="product-price flex items-center gap-1 flex-wrap">
         {getCurrentProduct()?.price_befor_discount && (

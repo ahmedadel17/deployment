@@ -4,8 +4,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './product/ProductCard';
+import type { Product } from '@/types/product';
 import { useTranslations } from 'next-intl';
-export default function ProductSlider({ products }: { products: any[] }) {
+export default function ProductSlider({ products }: { products: Product[] }) {
   console.log('products',products);
   const [isRTL, setIsRTL] = useState(false);
   const t = useTranslations();
@@ -108,27 +109,42 @@ export default function ProductSlider({ products }: { products: any[] }) {
           {/* Embla Carousel Wrapper */}
           <div className="embla overflow-hidden relative" ref={emblaRef}>
             <div className="embla__container flex gap-3 lg:gap-6 py-1">
-              {products.map((product, index) => {
-                // Group products in pairs for two products per slide
-                if (index % 2 === 0) {
-                  const nextProduct = products[index + 1];
+              {products.map((_, index) => {
+                // Group products in sets of 4 for large screens
+                if (index % 4 === 0) {
+                  const p1 = products[index];
+                  const p2 = products[index + 1];
+                  const p3 = products[index + 2];
+                  const p4 = products[index + 3];
                   return (
                     <div
                       key={`slide-${index}`}
                       className="embla__slide flex-shrink-0 py-1 w-full flex gap-3"
                     >
-                      <div className="flex-1">
-                        <ProductCard product={product} carousel={true} />
-                      </div>
-                      {nextProduct && (
-                        <div className="flex-1">
-                          <ProductCard product={nextProduct} carousel={true} />
+                      {p1 && (
+                        <div className="basis-1/2 lg:basis-1/4">
+                          <ProductCard product={p1} carousel={true} />
+                        </div>
+                      )}
+                      {p2 && (
+                        <div className="basis-1/2 lg:basis-1/4">
+                          <ProductCard product={p2} carousel={true} />
+                        </div>
+                      )}
+                      {p3 && (
+                        <div className="hidden lg:block lg:basis-1/4">
+                          <ProductCard product={p3} carousel={true} />
+                        </div>
+                      )}
+                      {p4 && (
+                        <div className="hidden lg:block lg:basis-1/4">
+                          <ProductCard product={p4} carousel={true} />
                         </div>
                       )}
                     </div>
                   );
                 }
-                return null; // Skip odd indices as they're handled in the pair above
+                return null; // Skip non-leading indices within each group of 4
               })}
             </div>
           </div>

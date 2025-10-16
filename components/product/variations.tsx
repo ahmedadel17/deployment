@@ -15,8 +15,8 @@ function Variations({variations, isSelected, isUpdatingVariations, handleVariati
               {variation.values.map((value, index) => (
                 <button
                   key={index}
-                  className={`size-option ${isSelected(variation.attribute_id, value.id) ? 'active' : ''} ${isUpdatingVariations ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => handleVariationSelect(variation.attribute_id, value.id)}
+                  className={`size-option ${isSelected(String(variation.attribute_id), String(value.id)) ? 'active' : ''} ${isUpdatingVariations ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleVariationSelect(String(variation.attribute_id), String(value.id))}
                   disabled={isUpdatingVariations}
                   aria-label={`Select ${variation.attribute_name} ${value.id}`}
                 >
@@ -31,9 +31,9 @@ function Variations({variations, isSelected, isUpdatingVariations, handleVariati
               {variation.values.map((value, index) => (
                 <button
                   key={index}
-                  className={`color-option ${isSelected(variation.attribute_id, value.id) ? 'active' : ''} ${isUpdatingVariations ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`color-option ${isSelected(String(variation.attribute_id), String(value.id)) ? 'active' : ''} ${isUpdatingVariations ? 'opacity-50 cursor-not-allowed' : ''}`}
                   style={{ backgroundColor: value.color }}
-                  onClick={() => handleVariationSelect(variation.attribute_id, value.id)}
+                  onClick={() => handleVariationSelect(String(variation.attribute_id), String(value.id))}
                   disabled={isUpdatingVariations}
                   title={value.value}
                   aria-label={`Select color ${value.id}`}

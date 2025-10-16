@@ -48,7 +48,7 @@ function ProductImage({ product, productWithVariations }: ProductImageProps) {
   }
 
   return (
-    <Link href={`/products/${product.id}`} className="product-thumbnail relative block overflow-hidden rounded-lg lg:rounded-t-lg lg:rounded-b-none group aspect-[4/5] sm:aspect-square">
+    <Link href={`/products/${product.slug}`} className="product-thumbnail relative block overflow-hidden rounded-lg lg:rounded-t-lg lg:rounded-b-none group aspect-[4/5] sm:aspect-square">
         {/* Product Badges */}
         {product.badges && product.badges.length > 0 && (
           <div className="product-badges absolute top-2 start-2 z-10 flex flex-col gap-1">
