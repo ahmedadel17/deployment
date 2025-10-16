@@ -43,8 +43,7 @@ export default function LocationPicker() {
 
     // Setup autocomplete
     const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: "eg" }, // restrict to Egypt
-      fields: ["geometry", "formatted_address"],
+      fields: ["geometry", "formatted_address"], // 🌍 Global search
     });
 
     autocomplete.addListener("place_changed", () => {
